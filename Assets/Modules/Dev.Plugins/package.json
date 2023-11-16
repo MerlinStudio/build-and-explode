@@ -1,0 +1,15 @@
+{
+  "name": "com.dev.plugins",
+  "version": "1.0.0",
+  "displayName": "Dev.Plugins",
+  "unity": "2021.3",
+  "description": "Zenject, UniRx, DoTween",
+  "author": {
+    "name": "Eugene"
+  },
+  "keywords": [
+    "package",
+    "dev",
+    "plugins"
+  ]
+}

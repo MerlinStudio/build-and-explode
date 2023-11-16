@@ -1,0 +1,2 @@
+Build path: /Users/eugene.morozov/Documents/Yandex Games/build-and-explode/builds/build-and-explode-04
+Build number: 33

@@ -1,0 +1,18 @@
+{
+    "name": "Game.Models",
+    "rootNamespace": "",
+    "references": [
+        "GUID:5eff5b7087c754087a51d30615e32640",
+        "GUID:2665a8d13d1b3f18800f46e256720795",
+        "GUID:00d49f0c628e64bb8847556abc883e6c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
