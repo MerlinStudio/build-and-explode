@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.Linq;
-using Data.Explosion.Configs;
+using Data.Builds.Configs;
+using Sirenix.OdinInspector;
 using UnityEditor;
 using UnityEngine;
 
@@ -17,7 +19,7 @@ namespace Content.ExplosionScene.Editor
         [SerializeField] private int m_buildTestZ;
         [SerializeField] private int m_buildTestAmountCube;
 
-        //[Button]
+        [Button]
         private void Init()
         {
             var cubes = m_parent.GetComponentsInChildren<CubeEditor>();
@@ -31,19 +33,29 @@ namespace Content.ExplosionScene.Editor
             m_configName = "BuildDataConfig";
         }
 
-        //[Button]
+        [Button]
         private void AddBuildConfig()
         {
             var buildDataConfig = ScriptableObject.CreateInstance<BuildDataConfig>();
             AssetDatabase.CreateAsset(buildDataConfig, $"{m_path}{m_configName}.asset");
-
-            var cubeTransforms = m_parent.GetComponentsInChildren<Transform>();
-            var cubePosition = cubeTransforms.Select(t => t.position).ToList();
-            buildDataConfig.BuildData = cubePosition;
+            
+            var blockTransforms = m_parent.GetComponentsInChildren<CubeEditor>();
+            var blockDatas = new List<BlockData>();
+            for (int i = 0; i < blockTransforms.Length; i++)
+            {
+                var block = blockTransforms[i];
+                var blockData = new BlockData
+                {
+                    Id = block.Id,
+                    Coord = Vector3Int.CeilToInt(block.transform.position)
+                };
+                blockDatas.Add(blockData);
+            }
+            buildDataConfig.BlockData = blockDatas;
             EditorUtility.SetDirty(buildDataConfig);
         }
 
-        //[Button]
+        [Button]
         private void BuildTest()
         {
             var cubes = m_parent.GetComponentsInChildren<CubeEditor>();

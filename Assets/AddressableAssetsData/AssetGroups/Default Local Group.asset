@@ -16,7 +16,17 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: eda4d663a22a04e77a938b070bb967ce
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: b4cceae66a1054d28a108c9415fd346e
+    m_Address: Assets/Content/Game/Content/Prefabs/Game/Environment/Cube.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ec064f3d040154c7aa9f255357a164bf
+    m_Address: Assets/Content/Game/Content/Prefabs/Game/Environment/Bomb.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: c25cdfd2c0a514670a858663aee867c0, type: 2}
   m_SchemaSet:

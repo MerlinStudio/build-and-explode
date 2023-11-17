@@ -42,6 +42,16 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e26ad908e6aae41d98ae4a243fd7f78d
+    m_Address: Assets/Content/Game/Content/Prefabs/UI/Panels/BuildClickerPanel.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cd3ad9b9c521d464cb5eb84c13374b97
+    m_Address: Assets/Content/Game/Content/Prefabs/UI/Panels/PreparationExplosionPanel.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: c25cdfd2c0a514670a858663aee867c0, type: 2}
   m_SchemaSet:

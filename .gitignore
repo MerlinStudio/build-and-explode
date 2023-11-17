@@ -2,3 +2,7 @@ Library
 Logs
 UserSettings
 obj
+.idea
+*.csproj
+DOTween.Modules.csproj
+build-and-explode.sln
