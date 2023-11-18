@@ -71,6 +71,8 @@ namespace Dev.Core.Ui.UI.Manager
                 Debug.LogError($"panel guids is null");
                 //m_panelGuids = UIPanels.Panels;
             }
+
+            m_uiCamera.tag = "UiCamera";
         }
 
         private void OnDestroy()

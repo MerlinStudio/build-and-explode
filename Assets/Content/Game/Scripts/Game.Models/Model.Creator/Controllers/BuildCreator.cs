@@ -49,7 +49,7 @@ namespace Model.Creator.Controllers
             m_blockViewInfo[m_index] = blockViewInfo;
             m_blockPropertyInfo[m_index] = newBlockInfo.Info;
             m_index++;
-            if (m_buildDataConfig.BlockData.Count >= m_index)
+            if (m_buildDataConfig.BlockData.Count <= m_index)
             {
                 EventBuildFinished?.Invoke();
             }

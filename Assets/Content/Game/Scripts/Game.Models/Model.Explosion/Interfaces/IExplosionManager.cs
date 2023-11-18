@@ -8,7 +8,8 @@ namespace Model.Explosion.Interfaces
     {
         void Init(IBuildProvider buildProvider, IBlockCreator BlockCreator, EnvironmentInfoConfig environmentInfoConfig);
         void DeInit();
-        void AddBomb(Transform blockTransform, int radius, int force, float delay);
+        void AddBombInfo(int radius, int force, float delay);
         void Explosion();
+        void ChangeBuildingLayer(float value);
     }
 }

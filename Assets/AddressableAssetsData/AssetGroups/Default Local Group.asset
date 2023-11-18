@@ -27,6 +27,11 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ddb6715a998ab466a83bf3dce97be038
+    m_Address: Assets/Content/Game/Content/Prefabs/Game/Environment/SelectionBomb.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: c25cdfd2c0a514670a858663aee867c0, type: 2}
   m_SchemaSet:
