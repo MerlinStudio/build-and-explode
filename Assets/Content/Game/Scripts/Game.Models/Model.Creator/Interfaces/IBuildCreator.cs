@@ -4,9 +4,11 @@ namespace Model.Creator.Interfaces
 {
     public interface IBuildCreator
     {
-        event Action EventBuildFinished;
+        bool IsAllAnimationFinished { get; }
+        event Action EventEndConstruction;
         void Init(int index);
         void DeInit();
-        void CreateBlock();
+        void SetAmountBlocks(int amountBlocks);
+        void CreateBlocks();
     }
 }

@@ -1,12 +1,13 @@
 using Cysharp.Threading.Tasks;
 using Model.Creator.Controllers;
+using Model.Creator.Creators;
 
 namespace Model.Creator.Interfaces
 {
-    public interface IBlockCreator
+    public interface ICreator
     {
         void Init();
         void DeInit();
-        UniTask<BlockCreator.NewBlockInfo> Create(string id);
+        UniTask<T> Create<T>(string id) where T : CreatedItem;
     }
 }

@@ -1,57 +1,69 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Content.Game.Scripts.Game.Utils.Extensions;
+using Cysharp.Threading.Tasks;
 using Data.Builds.Blocks;
-using Data.Explosion.Configs;
-using Data.Explosion.Info;
-using Lean.Touch;
-using Model.Creator.Controllers;
+using Model.Creator.Creators;
 using Model.Creator.Interfaces;
 using Model.Explosion.Interfaces;
 using UniRx;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Model.Explosion.Controllers
 {
-    public class ExplosionManager : IExplosionManager, IGameTick
+    public class BuildLayerController : IBlocksInfoProvider
     {
-        private readonly string m_bombId = "bomb";
+        public BuildLayerController(
+            IManagerCreator managerCreator,
+            IBlocksInfoProvider blocksInfoProvider,
+            IBombInfoProvider bombInfoProvider)
+        {
+            m_managerCreator = managerCreator;
+            m_blockPropertyInfo = blocksInfoProvider.GetBlockPropertyInfo().ToList();
+            m_blockViewInfo = blocksInfoProvider.GetBlockViewInfo().ToList();
+            m_bombInfoProvider = bombInfoProvider;
+        }
+
+        public event Action<Transform> EventSelectBombPlace;
+        
         private readonly string m_selectionBombId = "selection_bomb";
+        private readonly IManagerCreator m_managerCreator;
+        private readonly IBombInfoProvider m_bombInfoProvider;
 
-        private IBlockCreator m_blockCreator;
-        private ExplosionController m_explosionController;
-        private EnvironmentInfo m_environmentInfo;
-        private List<ExplosionInfo> m_explosionInfo;
-        private List<BlockViewInfo> m_blockViewInfo;
-        private List<BlockPropertyInfo> m_blockPropertyInfo;
-        private Dictionary<int, List<Transform>> m_buildingLayerDictionary;
         private int m_currentBuildLayer;
-
-        private BlockCreator.NewBlockInfo m_newBombInfo;
         private PointerHandler m_selectionBombReference;
         private CompositeDisposable m_compositeDisposable;
+        private CompositeDisposable m_newBombInfoDisposable;
+        private NewBlockInfo m_newBombInfo;
         private List<PointerHandler> m_selectionBomb;
-        private ComponentPool<byte, PointerHandler> m_selectionBombPool;
+        private List<BlockViewInfo> m_blockViewInfo;
+        private List<BlockPropertyInfo> m_blockPropertyInfo;
         private Dictionary<int, List<Vector3>> m_selectionBombDictionary;
         private Dictionary<int, List<Transform>> m_addedBombDictionary;
+        private Dictionary<int, List<Transform>> m_buildingLayerDictionary;
+        private ComponentPool<byte, PointerHandler> m_selectionBombPool;
 
-        public void Init(IBuildProvider buildProvider, IBlockCreator blockCreator, EnvironmentInfoConfig environmentInfoConfig)
+        public async void Init()
         {
-            m_blockCreator = blockCreator;
-            m_environmentInfo = environmentInfoConfig.EnvironmentInfo;
-            m_blockPropertyInfo = buildProvider.GetBlockPropertyInfo().ToList();
-            m_blockViewInfo = buildProvider.GetBlockViewInfo().ToList();
-
-            m_explosionInfo = new List<ExplosionInfo>();
             SetBuildingLayer();
-            SetSelectionBombReference();
+            await SetSelectionBombReference();
             SetSelectionBombPosition();
+            ChangeBuildingLayer(1f);
+            m_newBombInfoDisposable = new CompositeDisposable();
+            m_bombInfoProvider.NewBombInfo.Subscribe(UpdateBombInfo).AddTo(m_newBombInfoDisposable);
         }
 
         public void DeInit()
         {
-            m_explosionInfo.Clear();
+            m_compositeDisposable.Dispose();
+            m_newBombInfoDisposable.Dispose();
+            m_selectionBomb.Clear();
+            m_blockViewInfo.Clear();
+            m_blockPropertyInfo.Clear();
+            m_selectionBombDictionary.Clear();
+            m_addedBombDictionary.Clear();
+            m_buildingLayerDictionary.Clear();
         }
 
         private void SetBuildingLayer()
@@ -68,13 +80,13 @@ namespace Model.Explosion.Controllers
                 m_buildingLayerDictionary[blockViewInfo.Coord.y].Add(blockViewInfo.Transform);
             }
         }
-
-        private async void SetSelectionBombReference()
+        
+        private async UniTask SetSelectionBombReference()
         {
             m_compositeDisposable = new CompositeDisposable();
             m_selectionBomb = new List<PointerHandler>();
             m_selectionBombPool = new ComponentPool<byte, PointerHandler>();
-            var newBlockInfo = await m_blockCreator.Create(m_selectionBombId);
+            var newBlockInfo = await m_managerCreator.Create<NewBlockInfo, BlockCreator>(m_selectionBombId);
             m_selectionBombReference = newBlockInfo.Block.GetComponent<PointerHandler>();
             m_selectionBombReference.gameObject.SetActive(false);
         }
@@ -114,22 +126,14 @@ namespace Model.Explosion.Controllers
             }
         }
 
-        public void AddBombInfo(int radius, int force, float delay)
+        private void UpdateBombInfo(NewBlockInfo newBlockInfo)
         {
-            if (m_newBombInfo == null)
-            {
-                return;
-            }
+            m_newBombInfo = newBlockInfo;
+        }
 
-            var position = m_newBombInfo.Block.transform.position;
-            var explosionInfo = new ExplosionInfo
-            {
-                Center = position,
-                Radius = radius,
-                Force = force
-            };
-            m_explosionInfo.Add(explosionInfo);
-            var blockViewInfo = m_blockViewInfo.FirstOrDefault(b => b.Transform.position == position);
+        public void AddBombToLayer()
+        {
+            var blockViewInfo = m_blockViewInfo.FirstOrDefault(b => b.Transform.position == m_newBombInfo.Block.transform.position);
             if (blockViewInfo != null)
             {
                 var oldBlockTransform = m_buildingLayerDictionary[blockViewInfo.Coord.y].Find(b => b.transform == blockViewInfo.Transform);
@@ -158,28 +162,16 @@ namespace Model.Explosion.Controllers
             m_selectionBombPool.Push(oldSelectionBomb);
             m_selectionBombDictionary[blockViewInfo.Coord.y].Remove(blockViewInfo.Coord);
             m_addedBombDictionary[blockViewInfo.Coord.y].Add(m_newBombInfo.Block.transform);
-            m_newBombInfo = null;
-            
-            Debug.Log("Bomb added");
         }
 
         public void Explosion()
         {
             ResetAllBlocks();
-            
-            m_explosionController = new ExplosionController(m_blockPropertyInfo.ToArray(), m_blockViewInfo.ToArray(), m_environmentInfo);
-            m_explosionController.Init();
-            m_explosionController.SetupTransforms();
-            for (int i = 0; i < m_explosionInfo.Count; i++)
-            {
-                var explosionInfo = m_explosionInfo[i];
-                m_explosionController.Explosion(explosionInfo);
-            }
         }
 
         public void ChangeBuildingLayer(float value)
         {
-            var noRoundValue = (value / (1f / m_buildingLayerDictionary.Count));
+            var noRoundValue = value / (1f / (m_buildingLayerDictionary.Count - 1));
             var newBuildLayer = Mathf.RoundToInt(noRoundValue);
             if (m_currentBuildLayer == newBuildLayer)
             {
@@ -205,15 +197,17 @@ namespace Model.Explosion.Controllers
                         var selectionPositionBomb = selectionPositionBombs[j];
                         var selectionBomb = m_selectionBombPool.Pop(m_selectionBombReference);
                         selectionBomb.transform.position = selectionPositionBomb;
-                        selectionBomb.EventItemClick.Subscribe(OnSelectionBomb).AddTo(m_compositeDisposable);
+                        selectionBomb.EventItemClick.Subscribe(EventSelectBombPlace).AddTo(m_compositeDisposable);
                         m_selectionBomb.Add(selectionBomb);
                     }
                     addedBombTransforms.ForEach(t => t.gameObject.SetActive(true));
                 }
             }
+            m_buildingLayerDictionary.Last().Value.ForEach(t => t.gameObject.SetActive(false));
 
             m_currentBuildLayer = newBuildLayer;
             m_newBombInfo?.Block.gameObject.SetActive(false);
+            m_bombInfoProvider.VisibleNewBombInfo.Value = m_newBombInfo != null && m_newBombInfo.Block.gameObject.activeSelf;
         }
 
         private void ResetAllBlocks()
@@ -232,21 +226,15 @@ namespace Model.Explosion.Controllers
             m_selectionBomb.Clear();
             m_compositeDisposable.Clear();
         }
-        
-        private async void OnSelectionBomb(Transform selectionBlockTransform)
+
+        public BlockViewInfo[] GetBlockViewInfo()
         {
-            m_newBombInfo?.Block.gameObject.SetActive(true);
-            m_newBombInfo ??= await m_blockCreator.Create(m_bombId);
-            m_newBombInfo.Block.transform.position = selectionBlockTransform.position;
+            return m_blockViewInfo.ToArray();
         }
 
-        public void Tick()
+        public BlockPropertyInfo[] GetBlockPropertyInfo()
         {
-            if (m_explosionController == null)
-            {
-                return;
-            }
-            m_explosionController.Update();
+            return m_blockPropertyInfo.ToArray();
         }
     }
 }

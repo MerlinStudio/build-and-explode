@@ -9,11 +9,25 @@ namespace Data.Builds.Configs
     public class BuildDataConfig : ScriptableObject
     {
         [SerializeField] private List<BlockData> m_blockData;
+        [SerializeField] private List<Vector3> m_fireworkPositions;
+        [SerializeField] private int m_amountBomb;
 
         public List<BlockData> BlockData
         {
             get => m_blockData;
             set => m_blockData = value;
+        }
+        
+        public List<Vector3> FireworkPositions
+        {
+            get => m_fireworkPositions;
+            set => m_fireworkPositions = value;
+        }
+        
+        public int AmountBomb
+        {
+            get => m_amountBomb;
+            set => m_amountBomb = value;
         }
     }
 

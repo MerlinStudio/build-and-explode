@@ -61,5 +61,11 @@ namespace Content.Game.Scripts.Game.Utils.Extensions
                 components[defaultKey].Push(go);
             }
         }
+
+        public void Clear()
+        {
+            prefabs.Clear();
+            components.Clear();
+        }
     }
 }

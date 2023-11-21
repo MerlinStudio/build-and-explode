@@ -15,6 +15,7 @@ MonoBehaviour:
   prefabInstallers:
   - {fileID: 1950150362201876359, guid: 0ffe2d53b1fc7453e80ebe6da1555cba, type: 3}
   configs:
+  - {fileID: 11400000, guid: 8cd2e0aa70e564b34ab64dd618479dc7, type: 2}
   - {fileID: 11400000, guid: 4a1da50bc435141e784ab3307c9ebe95, type: 2}
   - {fileID: 11400000, guid: 83a8db99cbfd148a2a09b0b9a5e96e16, type: 2}
   - {fileID: 11400000, guid: 701fd8fa8e7cf442dbc62425e2ef564e, type: 2}

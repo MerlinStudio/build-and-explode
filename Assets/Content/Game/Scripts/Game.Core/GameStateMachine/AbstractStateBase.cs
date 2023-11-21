@@ -1,6 +1,8 @@
+using Model.Explosion.Interfaces;
+
 namespace Game.Core.GameStateMachine
 {
-    public abstract class AbstractStateBase
+    public abstract class AbstractStateBase : IGameTick
     {
         protected AbstractStateBase(StateDependencies dependencies)
         {
@@ -10,6 +12,10 @@ namespace Game.Core.GameStateMachine
         public abstract void DeinitState();
         
         public abstract class StateDependencies
+        {
+        }
+
+        public virtual void Tick()
         {
         }
     }

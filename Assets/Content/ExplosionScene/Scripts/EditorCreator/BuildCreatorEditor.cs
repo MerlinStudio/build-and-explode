@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Data.Builds.Configs;
 using Sirenix.OdinInspector;
+using Sirenix.Utilities;
 using UnityEditor;
 using UnityEngine;
 
@@ -41,9 +42,11 @@ namespace Content.ExplosionScene.Editor
             
             var blockTransforms = m_parent.GetComponentsInChildren<CubeEditor>();
             var blockDatas = new List<BlockData>();
-            for (int i = 0; i < blockTransforms.Length; i++)
+
+            var sortBlockTransforms = blockTransforms.OrderBy(b => b.transform.position.y).ToList();
+            for (int i = 0; i < sortBlockTransforms.Count; i++)
             {
-                var block = blockTransforms[i];
+                var block = sortBlockTransforms[i];
                 var blockData = new BlockData
                 {
                     Id = block.Id,
@@ -51,7 +54,28 @@ namespace Content.ExplosionScene.Editor
                 };
                 blockDatas.Add(blockData);
             }
+
+            var maxBlock = 5000;
+            var roundBlocks = Mathf.Clamp(blockDatas.Count, 0, maxBlock);
+            var t = roundBlocks / maxBlock;
+            var amountBomb = (int)Mathf.Lerp(1, 5, t);
+
+            var offset = 3;
+            var maxX = blockDatas.Max(b => b.Coord.x) + offset;
+            var minX = blockDatas.Min(b => b.Coord.x) - offset;
+            var maxZ = blockDatas.Max(b => b.Coord.z) + offset;
+            var minZ = blockDatas.Min(b => b.Coord.z) - offset;
+            var fireworkPositions = new List<Vector3>
+            {
+                new Vector3(maxX, -0.5f, maxZ),
+                new Vector3(maxX, -0.5f, minZ),
+                new Vector3(minX, -0.5f, maxZ),
+                new Vector3(minX, -0.5f, minZ)
+            };
+            
             buildDataConfig.BlockData = blockDatas;
+            buildDataConfig.FireworkPositions = fireworkPositions;
+            buildDataConfig.AmountBomb = amountBomb;
             EditorUtility.SetDirty(buildDataConfig);
         }
 

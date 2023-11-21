@@ -1,11 +1,15 @@
+using Dev.Core.Ui.UI.Manager;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using Zenject;
 
 namespace Dev.Core.Main
 {
     public class AddUICameraToStack : MonoBehaviour
     {
         [SerializeField] private Camera m_cameraWithStack;
+        
+        [Inject] private UiManager UiManager { get; }
 
         private Camera m_uiCamera;
 
@@ -13,6 +17,10 @@ namespace Dev.Core.Main
         {
             get
             {
+                if (!m_uiCamera)
+                { 
+                    m_uiCamera = UiManager.UiCamera;
+                }
                 if (!m_uiCamera)
                 { 
                     GameObject uiCameraGameObject = GameObject.FindGameObjectWithTag("UiCamera");

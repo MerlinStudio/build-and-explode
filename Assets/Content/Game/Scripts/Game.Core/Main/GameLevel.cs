@@ -1,13 +1,9 @@
-using System;
-using Data.Builds.Configs;
-using Data.Explosion.Configs;
+using Configs;
 using Dev.Core.Level;
 using Dev.Core.Ui.UI.Manager;
 using Game.Core.GameStateMachine;
 using Game.Data.Models;
-using Model.Creator.Controllers;
-using Model.Explosion.Controllers;
-using Model.Explosion.Interfaces;
+using Model.Creator.Creators;
 using UnityEngine;
 using Zenject;
 
@@ -15,33 +11,37 @@ namespace Game.Core.Main
 {
     public class GameLevel : Level
     {
-        [SerializeField] private CubCreator m_cubCreator;
         [SerializeField] private BlockCreator m_blockCreator;
+        [SerializeField] private ParticleCreator m_particleCreator;
+        [SerializeField] private UiEffectCreator m_uiEffectCreator;
         [SerializeField] private bool m_isWin;
         
         [Inject] private GameDataModel GameDataModel { get; }
         [Inject] private UiManager UiManager { get; }
         [Inject] private EnvironmentInfoConfig EnvironmentInfoConfig { get; }
+        [Inject] private ShopConfig ShopConfig { get; }
 
-        private IGameStateSwitcher m_gameStateSwitcher;
-        private ExplosionManager m_explosionManager;
-        
+        private GameStateSwitcher m_gameStateSwitcher;
+        private ManagerCreator m_managerCreator;
+
         public override void Initialize(LevelSettings levelSettings)
         {
             base.Initialize(levelSettings);
 
             UiManager.ShowPanel<BuildUIManager>();
 
+            m_managerCreator = new ManagerCreator();
+            m_managerCreator.Init(m_blockCreator, m_particleCreator, m_uiEffectCreator);
+            
             m_gameStateSwitcher = new GameStateSwitcher();
-            m_explosionManager = new ExplosionManager();
             var switcherDependencies = new SwitcherDependencies
             {
                 UiManager = UiManager,
                 GameDataModel = GameDataModel,
                 LevelSettings = levelSettings,
-                BlockCreator = m_blockCreator,
-                ExplosionManager = m_explosionManager,
-                EnvironmentInfoConfig = EnvironmentInfoConfig
+                ManagerCreator = m_managerCreator,
+                EnvironmentInfoConfig = EnvironmentInfoConfig,
+                ShopConfig = ShopConfig
             };
             m_gameStateSwitcher.Init(switcherDependencies);
             m_gameStateSwitcher.SwitchState<StateBuild>();
@@ -49,6 +49,7 @@ namespace Game.Core.Main
         
         public override void DeInitialize()
         {
+            m_managerCreator.DeInit();
             base.DeInitialize();
         }
 
@@ -72,7 +73,7 @@ namespace Game.Core.Main
 
         private void Update()
         {
-            m_explosionManager.Tick();
+            m_gameStateSwitcher?.Tick();
         }
     }
 }

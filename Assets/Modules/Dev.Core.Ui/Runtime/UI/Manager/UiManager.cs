@@ -18,6 +18,7 @@ namespace Dev.Core.Ui.UI.Manager
         public event Action<UIPanel> EventPanelHide;
 
         [SerializeField] private Camera m_uiCamera;
+        [SerializeField] private Canvas m_canvas;
 
         [Header("Layers")] [SerializeField] private Transform m_layersRoot;
         [SerializeField] private PanelLayer m_panelLayerPrefab;

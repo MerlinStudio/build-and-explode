@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Data.Explosion.Configs;
+using Configs;
 using Dev.Core.Level;
 using Dev.Core.Ui.UI.Manager;
 using Game.Data.Models;
@@ -9,28 +9,36 @@ using Model.Explosion.Interfaces;
 
 namespace Game.Core.GameStateMachine
 {
-    public class GameStateSwitcher : IGameStateSwitcher
+    public class GameStateSwitcher : IGameStateSwitcher, IGameTick
     {
-        private List<AbstractStateBase> m_allStates;
+        private IGameTick m_currentGameTicks;
         private AbstractStateBase m_currentState;
+        private List<AbstractStateBase> m_allStates;
 
         public void Init(SwitcherDependencies dependencies)
         {
-            var buildCreator = new BuildCreator(dependencies.LevelSettings.BuildDataConfig, dependencies.BlockCreator);
+            var buildCreator = new СonstructionСontroller(
+                dependencies.LevelSettings.BuildDataConfig,
+                dependencies.ManagerCreator,
+                dependencies.EnvironmentInfoConfig.BuildAnimationInfo);
             var stateBuildDependencies = new StateBuild.StateBuildDependencies
             {
                 GameStateSwitcher = this,
+                UiManager = dependencies.UiManager,
                 BuildCreator = buildCreator,
-                UiManager = dependencies.UiManager
+                ManagerCreator = dependencies.ManagerCreator,
+                EnvironmentInfoConfig = dependencies.EnvironmentInfoConfig,
+                BuildDataConfig = dependencies.LevelSettings.BuildDataConfig
             };
             var stateExplosionDependencies = new StateExplosion.StateExplosionDependencies
             {
                 GameStateSwitcher = this,
-                BuildProvider = buildCreator,
-                BlockCreator = dependencies.BlockCreator,
-                ExplosionManager = dependencies.ExplosionManager,
+                UiManager = dependencies.UiManager,
                 EnvironmentInfoConfig = dependencies.EnvironmentInfoConfig,
-                UiManager = dependencies.UiManager
+                ShopConfig = dependencies.ShopConfig,
+                BuildDataConfig = dependencies.LevelSettings.BuildDataConfig,
+                ManagerCreator = dependencies.ManagerCreator,
+                BlocksInfoProvider = buildCreator
             };
             m_allStates = new List<AbstractStateBase>
             {
@@ -45,6 +53,12 @@ namespace Game.Core.GameStateMachine
             m_currentState?.DeinitState();
             m_currentState = state;
             m_currentState.InitState();
+            m_currentGameTicks = m_currentState;
+        }
+
+        public void Tick()
+        {
+            m_currentGameTicks?.Tick();
         }
     }
 
@@ -53,8 +67,8 @@ namespace Game.Core.GameStateMachine
         public UiManager UiManager;
         public GameDataModel GameDataModel;
         public LevelSettings LevelSettings;
-        public IBlockCreator BlockCreator;
-        public IExplosionManager ExplosionManager;
         public EnvironmentInfoConfig EnvironmentInfoConfig;
+        public ShopConfig ShopConfig;
+        public IManagerCreator ManagerCreator;
     }
 }
