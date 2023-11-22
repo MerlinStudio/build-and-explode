@@ -1,4 +1,4 @@
-using Model.Explosion.Interfaces;
+using State.Explosion.Interfaces;
 
 namespace Game.Core.GameStateMachine
 {

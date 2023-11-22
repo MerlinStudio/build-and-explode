@@ -1,9 +1,10 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Dev.Core.Ui.UI.Panels;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
+using Widgets;
 
 namespace Panels
 {
@@ -27,18 +28,26 @@ namespace Panels
         [SerializeField] private TextMeshProUGUI m_amountBombsText;
         [SerializeField] private TextMeshProUGUI m_buyAmountBombText;
         [SerializeField] private Transform m_bombSettingsContent;
+        [SerializeField] private CountdownExplosionWidget m_countdownExplosionWidget;
+        [SerializeField] private AnimationWidget m_bombSettingAnimationWidget;
+        [SerializeField] private AnimationWidget m_sliderAnimationWidget;
 
         private int m_maxRadius = 30;
         private int m_maxForce = 15;
         private int m_maxDelay = 3;
 
-        public override void ShowPanel(bool showInstant = false)
+        public override async void ShowPanel(bool showInstant = false)
         {
             base.ShowPanel(showInstant);
             VisibilityBombSettings(false);
             ActiveAddBombButton(true);
             ActiveExplosionButton(false);
-
+            SetDefaultSliderValue();
+            
+            m_countdownExplosionWidget.Hide();
+            var task1 = m_bombSettingAnimationWidget.ShowUniTask();
+            var task2 = m_sliderAnimationWidget.ShowUniTask();
+            await UniTask.WhenAll(task1, task2);
             m_explosionButton.onClick.AddListener(OnExplosionButtonClick);
             m_addBombButton.onClick.AddListener(OnAddBombButtonClick);
             m_buyBombButton.onClick.AddListener(OnBuyBombButtonClick);
@@ -46,11 +55,6 @@ namespace Panels
             m_forceSlider.onValueChanged.AddListener(OnForceChange);
             m_delaySlider.onValueChanged.AddListener(OnDelayChange);
             m_buildingLayerSlider.onValueChanged.AddListener(OnBuildingLayerChange);
-            
-            m_radiusSlider.value = 0.5f;
-            m_forceSlider.value = 0.5f;
-            m_delaySlider.value = 0;
-            m_buildingLayerSlider.value = 1;
         }
 
         public override void HidePanel(bool hideInstant = false)
@@ -87,6 +91,14 @@ namespace Panels
             m_buyAmountBombText.text = $"+{amountBomb}";
         }
 
+        public async UniTask PlayCountdownExplosion()
+        {
+            m_countdownExplosionWidget.Show();
+            await m_countdownExplosionWidget.PlayCountdownExplosion();
+            m_countdownExplosionWidget.Hide();
+            await UniTask.Delay(200);
+        }
+
         private void ActiveExplosionButton(bool isActive)
         {
             if (m_explosionButton.gameObject.activeSelf == isActive)
@@ -98,6 +110,9 @@ namespace Panels
 
         private void OnExplosionButtonClick()
         {
+            m_explosionButton.onClick.RemoveListener(OnExplosionButtonClick);
+            m_bombSettingAnimationWidget.Hide();
+            m_sliderAnimationWidget.Hide();
             EventExplosionButtonClick?.Invoke();
         }
         
@@ -148,6 +163,18 @@ namespace Panels
         {
             var noRoundValue =  value / (1f / maxValue);
             return (float)Math.Round(noRoundValue, 1);
+        }
+
+        private void SetDefaultSliderValue()
+        {
+            m_radiusSlider.value = 0.5f;
+            m_forceSlider.value = 0.5f;
+            m_delaySlider.value = 0;
+            m_buildingLayerSlider.value = 1;
+
+            OnRadiusChange(m_radiusSlider.value);
+            OnForceChange(m_forceSlider.value);
+            OnDelayChange(m_delaySlider.value);
         }
     }
 }

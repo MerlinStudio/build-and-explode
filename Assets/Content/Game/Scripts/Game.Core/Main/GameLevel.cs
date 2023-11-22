@@ -1,9 +1,9 @@
 using Configs;
+using Creators;
 using Dev.Core.Level;
 using Dev.Core.Ui.UI.Manager;
 using Game.Core.GameStateMachine;
 using Game.Data.Models;
-using Model.Creator.Creators;
 using UnityEngine;
 using Zenject;
 
@@ -44,7 +44,6 @@ namespace Game.Core.Main
                 ShopConfig = ShopConfig
             };
             m_gameStateSwitcher.Init(switcherDependencies);
-            m_gameStateSwitcher.SwitchState<StateBuild>();
         }
         
         public override void DeInitialize()

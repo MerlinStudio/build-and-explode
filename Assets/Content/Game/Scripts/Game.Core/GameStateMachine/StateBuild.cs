@@ -2,11 +2,9 @@ using Configs;
 using Cysharp.Threading.Tasks;
 using Data.Builds.Configs;
 using Dev.Core.Ui.UI.Manager;
-using Model.Creator.Controllers;
-using Model.Creator.Creators;
-using Model.Creator.Interfaces;
 using Panels;
-using UnityEngine;
+using State.Creator.Controllers;
+using State.Creator.Interfaces;
 
 namespace Game.Core.GameStateMachine
 {
@@ -18,6 +16,7 @@ namespace Game.Core.GameStateMachine
         }
 
         private readonly StateBuildDependencies m_dependencies;
+        
         private BuildClickerPanel m_buildClickerPanel;
         private ClickEffectController m_clickEffectController;
 
@@ -30,7 +29,6 @@ namespace Game.Core.GameStateMachine
 
         public override void DeinitState()
         {
-            Debug.Log("di enit");
             m_dependencies.UiManager.HidePanel<BuildClickerPanel>();
             m_buildClickerPanel.EventButtonClicked -= OnCreateBlock;
             m_dependencies.BuildCreator.DeInit();
@@ -46,7 +44,7 @@ namespace Game.Core.GameStateMachine
         
         private void SetBuildCreator()
         {
-            m_dependencies.BuildCreator.Init(0); // todo
+            m_dependencies.BuildCreator.Init();
             m_dependencies.BuildCreator.SetAmountBlocks(3); // todo
             m_dependencies.BuildCreator.EventEndConstruction += OnEndConstruction;
         }

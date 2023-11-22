@@ -3,9 +3,10 @@ using Configs;
 using Dev.Core.Level;
 using Dev.Core.Ui.UI.Manager;
 using Game.Data.Models;
-using Model.Creator.Controllers;
-using Model.Creator.Interfaces;
-using Model.Explosion.Interfaces;
+using State.Creator.Controllers;
+using State.Creator.Interfaces;
+using State.Explosion.Interfaces;
+using State.SavaLoader.Controllers;
 
 namespace Game.Core.GameStateMachine
 {
@@ -17,10 +18,22 @@ namespace Game.Core.GameStateMachine
 
         public void Init(SwitcherDependencies dependencies)
         {
+            int lastPermanentBlockIndex = dependencies.LevelSettings.BuildDataConfig.BlockData.Count - 10; // todo взять из сохранения
             var buildCreator = new СonstructionСontroller(
                 dependencies.LevelSettings.BuildDataConfig,
                 dependencies.ManagerCreator,
                 dependencies.EnvironmentInfoConfig.BuildAnimationInfo);
+            var saveConstruction = new SaveConstructionController(
+                dependencies.LevelSettings.BuildDataConfig,
+                buildCreator,
+                lastPermanentBlockIndex);
+            
+            var stateSaveLoaderDependencies = new StateSaveLoader.StateSaveLoaderDependencies
+            {
+                GameStateSwitcher = this,
+                UiManager = dependencies.UiManager,
+                SaveConstructionController = saveConstruction
+            };
             var stateBuildDependencies = new StateBuild.StateBuildDependencies
             {
                 GameStateSwitcher = this,
@@ -28,7 +41,7 @@ namespace Game.Core.GameStateMachine
                 BuildCreator = buildCreator,
                 ManagerCreator = dependencies.ManagerCreator,
                 EnvironmentInfoConfig = dependencies.EnvironmentInfoConfig,
-                BuildDataConfig = dependencies.LevelSettings.BuildDataConfig
+                BuildDataConfig = dependencies.LevelSettings.BuildDataConfig,
             };
             var stateExplosionDependencies = new StateExplosion.StateExplosionDependencies
             {
@@ -42,9 +55,11 @@ namespace Game.Core.GameStateMachine
             };
             m_allStates = new List<AbstractStateBase>
             {
+                new StateSaveLoader(stateSaveLoaderDependencies),
                 new StateBuild(stateBuildDependencies),
                 new StateExplosion(stateExplosionDependencies)
             };
+            SwitchState<StateSaveLoader>();
         }
         
         public void SwitchState<T>() where T : AbstractStateBase

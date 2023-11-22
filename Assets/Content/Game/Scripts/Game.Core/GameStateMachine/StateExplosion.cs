@@ -2,11 +2,10 @@ using Configs;
 using Cysharp.Threading.Tasks;
 using Data.Builds.Configs;
 using Dev.Core.Ui.UI.Manager;
-using Model.Creator.Controllers;
-using Model.Creator.Interfaces;
-using Model.Explosion.Controllers;
-using Model.Explosion.Interfaces;
 using Panels;
+using State.Creator.Interfaces;
+using State.Explosion.Controllers;
+using State.Explosion.Interfaces;
 using UniRx;
 
 namespace Game.Core.GameStateMachine
@@ -86,11 +85,12 @@ namespace Game.Core.GameStateMachine
             m_inspectorBomb.Init();
         }
         
-        private void OnExplosionButtonClick()
+        private async void OnExplosionButtonClick()
         {
             m_preparationExplosionPanel.EventExplosionButtonClick -= OnExplosionButtonClick;
-            m_dependencies.UiManager.HidePanel<PreparationExplosionPanel>();
             m_buildLayerController.Explosion();
+            await m_preparationExplosionPanel.PlayCountdownExplosion();
+            m_dependencies.UiManager.HidePanel<PreparationExplosionPanel>();
             m_preparationExplosion.Explosion();
         }
         
