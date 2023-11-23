@@ -2,7 +2,7 @@ using Dev.Core.Ui.UI.Panels;
 using DG.Tweening;
 using UnityEngine;
 
-namespace Panels
+namespace Game.View.Panels
 {
     public class SaveLoaderPanel : UIPanel
     {

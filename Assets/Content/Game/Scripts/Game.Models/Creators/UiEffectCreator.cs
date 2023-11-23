@@ -2,10 +2,10 @@ using Configs;
 using Cysharp.Threading.Tasks;
 using Dev.Core.Ui.UI.Manager;
 using Game.Utils.Extantions;
-using Panels;
+using Game.View.Panels;
+using Game.View.Widgets;
 using State.Creator.Interfaces;
 using UnityEngine;
-using Widgets;
 using Zenject;
 
 namespace Creators

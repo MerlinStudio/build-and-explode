@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
-namespace Widgets
+namespace Game.View.Widgets
 {
     public class CountdownExplosionWidget : MonoBehaviour
     {

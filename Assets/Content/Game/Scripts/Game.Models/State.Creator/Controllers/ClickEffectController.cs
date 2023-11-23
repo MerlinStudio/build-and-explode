@@ -5,9 +5,9 @@ using Configs;
 using Creators;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using Game.View.Widgets;
 using State.Creator.Interfaces;
 using UnityEngine;
-using Widgets;
 
 namespace State.Creator.Controllers
 {

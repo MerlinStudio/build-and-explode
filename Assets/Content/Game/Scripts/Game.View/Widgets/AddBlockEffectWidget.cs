@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-namespace Widgets
+namespace Game.View.Widgets
 {
     public class AddBlockEffectWidget : MonoBehaviour
     {

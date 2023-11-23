@@ -24,4 +24,90 @@ MonoBehaviour:
         m_SubObjectType: 
         m_EditorAssetChanged: 0
       <LevelSettings>k__BackingField:
+        m_buildDataConfig: {fileID: 11400000, guid: 3baba5c711df248dab34ced534978a45, type: 2}
+        m_miniLevelData:
+          AssetReference:
+            m_AssetGUID: 574cccf8719e64e27989997dc9b18b29
+            m_SubObjectName: 
+            m_SubObjectType: 
+            m_EditorAssetChanged: 0
+    - <IsRepeat>k__BackingField: 1
+      <LevelID>k__BackingField: level_id_02
+      <UseCustomLevelInfo>k__BackingField: 0
+      <LevelReference>k__BackingField:
+        m_AssetGUID: 
+        m_SubObjectName: 
+        m_SubObjectType: 
+        m_EditorAssetChanged: 0
+      <LevelSettings>k__BackingField:
+        m_buildDataConfig: {fileID: 11400000, guid: 38e631d43cc4c4444aa2e6f76d1f8180, type: 2}
+        m_miniLevelData:
+          AssetReference:
+            m_AssetGUID: b1776cc3ce103420bbeb01da84fb0904
+            m_SubObjectName: 
+            m_SubObjectType: 
+            m_EditorAssetChanged: 0
+    - <IsRepeat>k__BackingField: 1
+      <LevelID>k__BackingField: level_id_03
+      <UseCustomLevelInfo>k__BackingField: 0
+      <LevelReference>k__BackingField:
+        m_AssetGUID: 
+        m_SubObjectName: 
+        m_SubObjectType: 
+        m_EditorAssetChanged: 0
+      <LevelSettings>k__BackingField:
         m_buildDataConfig: {fileID: 11400000, guid: c3e127a0b72394d86bba44d2890b8922, type: 2}
+        m_miniLevelData:
+          AssetReference:
+            m_AssetGUID: 8d33df5a46a3a4fda8c9a153403957db
+            m_SubObjectName: 
+            m_SubObjectType: 
+            m_EditorAssetChanged: 0
+    - <IsRepeat>k__BackingField: 1
+      <LevelID>k__BackingField: level_id_04
+      <UseCustomLevelInfo>k__BackingField: 0
+      <LevelReference>k__BackingField:
+        m_AssetGUID: 
+        m_SubObjectName: 
+        m_SubObjectType: 
+        m_EditorAssetChanged: 0
+      <LevelSettings>k__BackingField:
+        m_buildDataConfig: {fileID: 11400000, guid: c3e127a0b72394d86bba44d2890b8922, type: 2}
+        m_miniLevelData:
+          AssetReference:
+            m_AssetGUID: b1776cc3ce103420bbeb01da84fb0904
+            m_SubObjectName: 
+            m_SubObjectType: 
+            m_EditorAssetChanged: 0
+    - <IsRepeat>k__BackingField: 1
+      <LevelID>k__BackingField: level_id_05
+      <UseCustomLevelInfo>k__BackingField: 0
+      <LevelReference>k__BackingField:
+        m_AssetGUID: 
+        m_SubObjectName: 
+        m_SubObjectType: 
+        m_EditorAssetChanged: 0
+      <LevelSettings>k__BackingField:
+        m_buildDataConfig: {fileID: 11400000, guid: c3e127a0b72394d86bba44d2890b8922, type: 2}
+        m_miniLevelData:
+          AssetReference:
+            m_AssetGUID: b1776cc3ce103420bbeb01da84fb0904
+            m_SubObjectName: 
+            m_SubObjectType: 
+            m_EditorAssetChanged: 0
+    - <IsRepeat>k__BackingField: 1
+      <LevelID>k__BackingField: level_id_06
+      <UseCustomLevelInfo>k__BackingField: 0
+      <LevelReference>k__BackingField:
+        m_AssetGUID: 
+        m_SubObjectName: 
+        m_SubObjectType: 
+        m_EditorAssetChanged: 0
+      <LevelSettings>k__BackingField:
+        m_buildDataConfig: {fileID: 11400000, guid: c3e127a0b72394d86bba44d2890b8922, type: 2}
+        m_miniLevelData:
+          AssetReference:
+            m_AssetGUID: b1776cc3ce103420bbeb01da84fb0904
+            m_SubObjectName: 
+            m_SubObjectType: 
+            m_EditorAssetChanged: 0

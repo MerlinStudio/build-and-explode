@@ -4,6 +4,7 @@ using Dev.Core.Level;
 using Dev.Core.Ui.UI.Manager;
 using Game.Core.GameStateMachine;
 using Game.Data.Models;
+using Game.View.Panels;
 using UnityEngine;
 using Zenject;
 
@@ -20,6 +21,8 @@ namespace Game.Core.Main
         [Inject] private UiManager UiManager { get; }
         [Inject] private EnvironmentInfoConfig EnvironmentInfoConfig { get; }
         [Inject] private ShopConfig ShopConfig { get; }
+        [Inject] private LevelsConfig LevelsConfig { get; }
+        [Inject] private LevelMapConfig LevelMapConfig { get; }
 
         private GameStateSwitcher m_gameStateSwitcher;
         private ManagerCreator m_managerCreator;
@@ -29,7 +32,7 @@ namespace Game.Core.Main
             base.Initialize(levelSettings);
 
             UiManager.ShowPanel<BuildUIManager>();
-
+            
             m_managerCreator = new ManagerCreator();
             m_managerCreator.Init(m_blockCreator, m_particleCreator, m_uiEffectCreator);
             
@@ -41,7 +44,9 @@ namespace Game.Core.Main
                 LevelSettings = levelSettings,
                 ManagerCreator = m_managerCreator,
                 EnvironmentInfoConfig = EnvironmentInfoConfig,
-                ShopConfig = ShopConfig
+                ShopConfig = ShopConfig,
+                LevelsConfig = LevelsConfig,
+                LevelMapConfig = LevelMapConfig
             };
             m_gameStateSwitcher.Init(switcherDependencies);
         }

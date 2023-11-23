@@ -1,7 +1,7 @@
 using Cysharp.Threading.Tasks;
 using Data.Builds.Configs;
 using Dev.Core.Ui.UI.Manager;
-using Panels;
+using Game.View.Panels;
 using State.Creator.Interfaces;
 using State.SavaLoader.Interfaces;
 

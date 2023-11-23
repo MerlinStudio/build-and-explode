@@ -5,7 +5,7 @@ using DG.Tweening;
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-namespace Widgets
+namespace Game.View.Widgets
 {
     public class AnimationWidget : MonoBehaviour
     {

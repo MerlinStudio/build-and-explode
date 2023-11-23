@@ -1,6 +1,6 @@
 using Configs;
 using Data.Builds.Configs;
-using Panels;
+using Game.View.Panels;
 using UnityEngine;
 
 namespace State.Explosion.Controllers

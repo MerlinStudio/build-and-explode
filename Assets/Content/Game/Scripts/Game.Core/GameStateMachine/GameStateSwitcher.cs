@@ -53,13 +53,22 @@ namespace Game.Core.GameStateMachine
                 ManagerCreator = dependencies.ManagerCreator,
                 BlocksInfoProvider = buildCreator
             };
+            var stateResultDependencies = new StateResult.StateResultDependencies
+            {
+                GameStateSwitcher = this,
+                UiManager = dependencies.UiManager,
+                LevelsConfig = dependencies.LevelsConfig,
+                LevelMapConfig = dependencies.LevelMapConfig
+            };
             m_allStates = new List<AbstractStateBase>
             {
                 new StateSaveLoader(stateSaveLoaderDependencies),
                 new StateBuild(stateBuildDependencies),
-                new StateExplosion(stateExplosionDependencies)
+                new StateExplosion(stateExplosionDependencies),
+                new StateResult(stateResultDependencies)
             };
-            SwitchState<StateSaveLoader>();
+            //SwitchState<StateSaveLoader>();
+            SwitchState<StateResult>();
         }
         
         public void SwitchState<T>() where T : AbstractStateBase
@@ -84,6 +93,8 @@ namespace Game.Core.GameStateMachine
         public LevelSettings LevelSettings;
         public EnvironmentInfoConfig EnvironmentInfoConfig;
         public ShopConfig ShopConfig;
+        public LevelsConfig LevelsConfig;
+        public LevelMapConfig LevelMapConfig;
         public IManagerCreator ManagerCreator;
     }
 }

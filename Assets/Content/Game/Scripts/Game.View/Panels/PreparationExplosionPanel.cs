@@ -1,12 +1,12 @@
 using System;
 using Cysharp.Threading.Tasks;
 using Dev.Core.Ui.UI.Panels;
+using Game.View.Widgets;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Widgets;
 
-namespace Panels
+namespace Game.View.Panels
 {
     public class PreparationExplosionPanel : UIPanel
     {

@@ -4,7 +4,7 @@ using Lean.Touch;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Panels
+namespace Game.View.Panels
 {
     public class BuildClickerPanel : UIPanel
     {
