@@ -1,0 +1,17 @@
+{
+  "idSave": 122,
+  "isFirstSession": false,
+  "language": "ru",
+  "promptDone": false,
+  "money": 1,
+  "newPlayerName": "Hello!",
+  "openLevels": [
+    false,
+    true,
+    false
+  ],
+  "PastLevelNumber": 3,
+  "SelectedLevelNumber": 0,
+  "LastNumberBlock": 25,
+  "BlockMultiplier": 1
+}

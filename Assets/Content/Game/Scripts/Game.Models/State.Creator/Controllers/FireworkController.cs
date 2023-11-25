@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using Creators;
+using Common.Creators;
 using Cysharp.Threading.Tasks;
 using Data.Builds.Configs;
 using State.Creator.Interfaces;
+using State.LevelLoader.Interfaces;
 using UnityEngine;
 
 namespace State.Creator.Controllers
@@ -12,20 +13,21 @@ namespace State.Creator.Controllers
     {
         public FireworkController(
             IManagerCreator managerCreator,
-            BuildDataConfig buildDataConfig)
+            ILevelProvider levelProvider)
         {
             m_managerCreator = managerCreator;
-            m_buildDataConfig = buildDataConfig;
+            m_levelProvider = levelProvider;
         }
 
         private readonly IManagerCreator m_managerCreator;
-        private readonly BuildDataConfig m_buildDataConfig;
+        private readonly ILevelProvider m_levelProvider;
         private readonly string m_particleId = "firework";
 
         public async UniTask PlayFirework()
         {
             var particleSystems = new List<ParticleSystem>();
-            var fireworkPositions = m_buildDataConfig.FireworkPositions;
+            var buildDataConfig = m_levelProvider.GetCurrentBuildDataConfig();
+            var fireworkPositions = buildDataConfig.FireworkPositions;
             for (int i = 0; i < fireworkPositions.Count; i++)
             {
                 var fireworkPosition = fireworkPositions[i];

@@ -11,9 +11,9 @@ using Dev.Core.Ui.UI.Panels;
              {"Dev.Core.Loading.GameLoadingPanel", "2cb559a9517e94be1bdfb78b28aa8cfa"},
              {"Dev.Core.Ui.UI.Panels.ExamplePanel", "e40729faf4d7148498ac0d4064dee0c5"},
              {"Game.View.Panels.BuildClickerPanel", "e26ad908e6aae41d98ae4a243fd7f78d"},
-             {"BuildUIManager", "577d7ce8e0df440eba41230f4bc5a35e"},
-             {"Game.View.Panels.PreparationExplosionPanel", "cd3ad9b9c521d464cb5eb84c13374b97"},
+             {"Game.View.Panels.FPSPanel", "577d7ce8e0df440eba41230f4bc5a35e"},
              {"Game.View.Panels.LevelMapPanel", "e1f47fb55c35447eab191cbf6f56a72d"},
+             {"Game.View.Panels.PreparationExplosionPanel", "cd3ad9b9c521d464cb5eb84c13374b97"},
              {"Game.View.Panels.SaveLoaderPanel", "312c1314503c44cc09dc2e4b5cd062e3"}
         };
     }

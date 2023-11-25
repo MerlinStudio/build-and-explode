@@ -1,29 +1,35 @@
+using Common.Saves.Controllers;
+using Common.Saves.Interfaces;
 using Cysharp.Threading.Tasks;
-using Data.Builds.Configs;
 using State.Creator.Interfaces;
+using State.LevelLoader.Interfaces;
 using State.SavaLoader.Interfaces;
+using UnityEngine;
 
 namespace State.SavaLoader.Controllers
 {
     public class SaveConstructionController : ISaveConstructionController
     {
         public SaveConstructionController(
-            BuildDataConfig buildDataConfig,
+            ILevelProvider levelProvider,
             IBuildCreator buildCreator,
-            int lastPermanentBlockIndex)
+            ISavesProvider savesProvider)
         {
-            m_buildDataConfig = buildDataConfig;
+            m_levelProvider = levelProvider;
             m_buildCreator = buildCreator;
-            m_lastPermanentBlockIndex = lastPermanentBlockIndex;
+            m_savesProvider = savesProvider;
         }
 
-        private readonly BuildDataConfig m_buildDataConfig;
+        private readonly ILevelProvider m_levelProvider;
         private readonly IBuildCreator m_buildCreator;
-        private readonly int m_lastPermanentBlockIndex;
+        private readonly ISavesProvider m_savesProvider;
 
-        public async UniTask Construction() 
+        private int m_lastNumberBlockSaves;
+
+        public async UniTask Construction()
         {
-            for (int j = 0; j < m_lastPermanentBlockIndex; j++)
+            m_lastNumberBlockSaves = m_savesProvider.GetSavesData<LastNumberBlockSaves>();
+            for (int j = 0; j < m_lastNumberBlockSaves; j++)
             {
                 await m_buildCreator.CreateBlock();
                 if (j % 10 == 0)
@@ -35,7 +41,8 @@ namespace State.SavaLoader.Controllers
 
         public bool CheckConstructionProgress()
         {
-            return m_buildDataConfig.BlockData.Count <= m_lastPermanentBlockIndex;
+            var buildDataConfig = m_levelProvider.GetCurrentBuildDataConfig();
+            return buildDataConfig.BlockData.Count <= m_lastNumberBlockSaves;
         }
     }
 }

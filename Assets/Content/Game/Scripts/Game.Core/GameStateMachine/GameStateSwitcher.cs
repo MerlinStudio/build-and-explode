@@ -1,74 +1,111 @@
 using System.Collections.Generic;
-using Configs;
-using Dev.Core.Level;
+using Base.Dev.Core.Runtime.Configs;
+using Common.Configs;
+using Common.Saves.Interfaces;
 using Dev.Core.Ui.UI.Manager;
-using Game.Data.Models;
+using Game.Core.GameStateMachine.Interfaces;
 using State.Creator.Controllers;
 using State.Creator.Interfaces;
 using State.Explosion.Interfaces;
+using State.LevelLoader.Providers;
 using State.SavaLoader.Controllers;
+using Zenject;
 
 namespace Game.Core.GameStateMachine
 {
-    public class GameStateSwitcher : IGameStateSwitcher, IGameTick
+    public class GameStateSwitcher : IInitializerGameState, IGameStateSwitcher, ITickable
     {
+        public GameStateSwitcher(
+            UiManager uiManager,
+            EnvironmentInfoConfig environmentInfoConfig,
+            ShopConfig shopConfig,
+            LevelsConfig levelsConfig,
+            LevelMapConfig levelMapConfig,
+            IManagerCreator managerCreator,
+            ISavesProvider savesProvider)
+        {
+            m_uiManager = uiManager;
+            m_environmentInfoConfig = environmentInfoConfig;
+            m_shopConfig = shopConfig;
+            m_levelsConfig = levelsConfig;
+            m_levelMapConfig = levelMapConfig;
+            m_managerCreator = managerCreator;
+            m_savesProvider = savesProvider;
+        }
+        
+        private readonly UiManager m_uiManager;
+        private readonly EnvironmentInfoConfig m_environmentInfoConfig;
+        private readonly ShopConfig m_shopConfig;
+        private readonly LevelsConfig m_levelsConfig;
+        private readonly LevelMapConfig m_levelMapConfig;
+        private readonly IManagerCreator m_managerCreator;
+        private readonly ISavesProvider m_savesProvider;
+        
         private IGameTick m_currentGameTicks;
         private AbstractStateBase m_currentState;
         private List<AbstractStateBase> m_allStates;
 
-        public void Init(SwitcherDependencies dependencies)
+        public void Init()
         {
-            int lastPermanentBlockIndex = dependencies.LevelSettings.BuildDataConfig.BlockData.Count - 10; // todo взять из сохранения
-            var buildCreator = new СonstructionСontroller(
-                dependencies.LevelSettings.BuildDataConfig,
-                dependencies.ManagerCreator,
-                dependencies.EnvironmentInfoConfig.BuildAnimationInfo);
-            var saveConstruction = new SaveConstructionController(
-                dependencies.LevelSettings.BuildDataConfig,
-                buildCreator,
-                lastPermanentBlockIndex);
-            
+            var levelProvider = new LevelProvider();
+            var buildCreator = new СonstructionСontroller(levelProvider, m_managerCreator, m_savesProvider, m_environmentInfoConfig.BuildAnimationInfo);
+            var saveConstruction = new SaveConstructionController(levelProvider, buildCreator, m_savesProvider);
+                        
+            var stateLevelLoaderDependencies = new StateLevelLoader.StateLevelLoaderDependencies
+            {
+                GameStateSwitcher = this,
+                SavesProvider = m_savesProvider,
+                LevelProvider = levelProvider,
+                LevelsConfig = m_levelsConfig,
+                ConstructionReset = buildCreator
+            };
             var stateSaveLoaderDependencies = new StateSaveLoader.StateSaveLoaderDependencies
             {
                 GameStateSwitcher = this,
-                UiManager = dependencies.UiManager,
+                UiManager = m_uiManager,
                 SaveConstructionController = saveConstruction
             };
             var stateBuildDependencies = new StateBuild.StateBuildDependencies
             {
                 GameStateSwitcher = this,
-                UiManager = dependencies.UiManager,
+                UiManager = m_uiManager,
                 BuildCreator = buildCreator,
-                ManagerCreator = dependencies.ManagerCreator,
-                EnvironmentInfoConfig = dependencies.EnvironmentInfoConfig,
-                BuildDataConfig = dependencies.LevelSettings.BuildDataConfig,
+                ManagerCreator = m_managerCreator,
+                SavesProvider = m_savesProvider,
+                EnvironmentInfoConfig = m_environmentInfoConfig,
+                LevelProvider = levelProvider,
             };
             var stateExplosionDependencies = new StateExplosion.StateExplosionDependencies
             {
                 GameStateSwitcher = this,
-                UiManager = dependencies.UiManager,
-                EnvironmentInfoConfig = dependencies.EnvironmentInfoConfig,
-                ShopConfig = dependencies.ShopConfig,
-                BuildDataConfig = dependencies.LevelSettings.BuildDataConfig,
-                ManagerCreator = dependencies.ManagerCreator,
+                UiManager = m_uiManager,
+                EnvironmentInfoConfig = m_environmentInfoConfig,
+                ShopConfig = m_shopConfig,
+                LevelProvider = levelProvider,
+                ManagerCreator = m_managerCreator,
                 BlocksInfoProvider = buildCreator
             };
             var stateResultDependencies = new StateResult.StateResultDependencies
             {
                 GameStateSwitcher = this,
-                UiManager = dependencies.UiManager,
-                LevelsConfig = dependencies.LevelsConfig,
-                LevelMapConfig = dependencies.LevelMapConfig
+                UiManager = m_uiManager,
+                LevelsConfig = m_levelsConfig,
+                LevelMapConfig = m_levelMapConfig,
+                SavesProvider = m_savesProvider
             };
             m_allStates = new List<AbstractStateBase>
             {
+                new StateLevelLoader(stateLevelLoaderDependencies),
                 new StateSaveLoader(stateSaveLoaderDependencies),
                 new StateBuild(stateBuildDependencies),
                 new StateExplosion(stateExplosionDependencies),
                 new StateResult(stateResultDependencies)
             };
-            //SwitchState<StateSaveLoader>();
-            SwitchState<StateResult>();
+            SwitchState<StateLevelLoader>();
+        }
+        
+        public void DeInit()
+        {
         }
         
         public void SwitchState<T>() where T : AbstractStateBase
@@ -84,17 +121,5 @@ namespace Game.Core.GameStateMachine
         {
             m_currentGameTicks?.Tick();
         }
-    }
-
-    public class SwitcherDependencies
-    {
-        public UiManager UiManager;
-        public GameDataModel GameDataModel;
-        public LevelSettings LevelSettings;
-        public EnvironmentInfoConfig EnvironmentInfoConfig;
-        public ShopConfig ShopConfig;
-        public LevelsConfig LevelsConfig;
-        public LevelMapConfig LevelMapConfig;
-        public IManagerCreator ManagerCreator;
     }
 }

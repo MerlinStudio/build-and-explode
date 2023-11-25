@@ -18,7 +18,10 @@ namespace YG
 
         // Ваши сохранения
 
-        // ...
+        public int PastLevelNumber = 0;
+        public int SelectedLevelNumber = 0;
+        public int LastNumberBlock = 0;
+        public int BlockMultiplier = 1;
 
         // Поля (сохранения) можно удалять и создавать новые. При обновлении игры сохранения ломаться не должны
 

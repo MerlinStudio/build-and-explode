@@ -1,6 +1,7 @@
-using Configs;
+using Common.Configs;
 using Data.Builds.Configs;
 using Game.View.Panels;
+using State.LevelLoader.Interfaces;
 using UnityEngine;
 
 namespace State.Explosion.Controllers
@@ -8,16 +9,16 @@ namespace State.Explosion.Controllers
     public class InspectorBomb
     {
         public InspectorBomb(
-            BuildDataConfig buildDataConfig,
+            ILevelProvider levelProvider,
             ShopConfig shopConfig,
             PreparationExplosionPanel preparationExplosionPanel)
         {
-            m_buildDataConfig = buildDataConfig;
+            m_levelProvider = levelProvider;
             m_shopConfig = shopConfig;
             m_preparationExplosionPanel = preparationExplosionPanel;
         }
 
-        private readonly BuildDataConfig m_buildDataConfig;
+        private readonly ILevelProvider m_levelProvider;
         private readonly ShopConfig m_shopConfig;
         private readonly PreparationExplosionPanel m_preparationExplosionPanel;
 
@@ -25,7 +26,8 @@ namespace State.Explosion.Controllers
 
         public void Init()
         {
-            m_currentAmountBomb = m_buildDataConfig.AmountBomb;
+            var buildDataConfig = m_levelProvider.GetCurrentBuildDataConfig();
+            m_currentAmountBomb = buildDataConfig.AmountBomb;
             m_preparationExplosionPanel.SetAmountBombs(m_currentAmountBomb);
             m_preparationExplosionPanel.SetBuyAmountBombText(m_shopConfig.BuyBombForAd);
             m_preparationExplosionPanel.EventBuyBombButtonClick += OnBuyBombButtonClick;

@@ -1,26 +1,26 @@
+using Common.Creators;
+using Common.Saves.Providers;
 using Dev.Core.Main;
+using Game.Core.GameStateMachine;
+using Game.Core.Main;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Zenject;
 
 namespace Dev.Core.Installer
 {
     public class GameCoreInstaller : MonoInstaller<GameCoreInstaller>
     {
-        [SerializeField]
-        private GameCoreInitializer gameCoreInitializer;
-
-        [SerializeField]
-        private LevelLoader levelLoader;
+        [FormerlySerializedAs("m_gameLevel")] [SerializeField]
+        private GameInitializer m_gameInitializer;
         
         [SerializeField]
-        private CameraManager cameraManager;
+        private CameraManager m_cameraManager;
         
         public override void InstallBindings()
         {
-            Container.Bind<CameraManager>().FromInstance(cameraManager).AsSingle();
-            Container.BindInterfacesTo<GameCoreInitializer>().FromInstance(gameCoreInitializer).AsSingle();
-            Container.BindInterfacesTo<LevelLoader>().FromInstance(levelLoader).AsSingle();
-            Container.BindInterfacesTo<PlayerLoopFacade>().AsSingle();
+            Container.Bind<CameraManager>().FromInstance(m_cameraManager).AsSingle();
+            Container.Bind<GameInitializer>().FromInstance(m_gameInitializer).AsSingle();
         }
     }
 }

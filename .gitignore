@@ -7,3 +7,7 @@ obj
 DOTween.Modules.csproj
 build-and-explode.sln
 Temp
+ProjectSettings
+Assets/AddressableAssetsData/WebGL
+*.xml
+Assets/AddressableAssetsData/ProfileDataSourceSettings.asset

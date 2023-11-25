@@ -52,13 +52,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 5aa14cc04f4814af69cca86ca07a600c
-    m_Address: Assets/Content/Game/Content/Prefabs/LevelCombiners/MeshCompiner.asset
+  - m_GUID: c8e5d23980bbe4848a514f7c6a7e9621
+    m_Address: Assets/Content/Game/Content/Prefabs/LevelCombiners/Prefabs/MiniLevel_02.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: b1776cc3ce103420bbeb01da84fb0904
-    m_Address: Assets/Content/Game/Content/Prefabs/LevelCombiners/Prefabs/MimiLevelTEst.prefab
+  - m_GUID: dc9f9392fe3794ed5bd3a809d0bd81d0
+    m_Address: Assets/Content/Game/Content/Prefabs/Game/Environment/Cube 1.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -67,9 +67,13 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8d33df5a46a3a4fda8c9a153403957db
-    m_Address: Assets/Content/Game/Content/Prefabs/LevelCombiners/Prefabs/MimiLevelTEst
-      1.prefab
+  - m_GUID: 6ebe7109b4e5c4538b339ec11f1eb55b
+    m_Address: Assets/Content/Game/Content/Prefabs/LevelCombiners/Prefabs/MiniLevel_01.prefab
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c4a989dface2b44799ea71b65c848a50
+    m_Address: Assets/Content/Game/Content/Prefabs/LevelCombiners/Prefabs/MiniLevel_03.prefab
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

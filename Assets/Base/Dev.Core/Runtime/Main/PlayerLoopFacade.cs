@@ -1,10 +1,9 @@
+using Base.Dev.Core.Runtime.Level;
 using Cysharp.Threading.Tasks;
 using Dev.Core.Interfaces;
 using Dev.Core.Level;
 using Dev.Core.PanelExample;
 using Dev.Core.Ui.UI.Manager;
-using Game.Data;
-using Game.Data.Models;
 using UniRx;
 
 namespace Dev.Core.Main
@@ -15,20 +14,17 @@ namespace Dev.Core.Main
         (
             ILevelsProvider levelsProvider,
             ILevelLoader levelLoader,
-            UiManager uiManager,
-            GameDataModel gameDataModel
+            UiManager uiManager
         )
         {
             this.levelsProvider = levelsProvider;
             this.levelLoader = levelLoader;
             this.uiManager = uiManager;
-            this.gameDataModel = gameDataModel;
         }
 
         private readonly ILevelsProvider levelsProvider;
         private readonly ILevelLoader levelLoader;
         private readonly UiManager uiManager;
-        private readonly GameDataModel gameDataModel;
 
         private CompositeDisposable levelStartCompositeDisposables;
         private CompositeDisposable levelFinishedCompositeDisposables;
@@ -83,11 +79,9 @@ namespace Dev.Core.Main
             resultPanel.EventContinueLevel.Subscribe(OnContinueLevel).AddTo(levelFinishedCompositeDisposables);
         }
         
-        private void OnLevelResult(LevelResultData levelResultData)
+        private void OnLevelResult(bool isWin)
         {
-            gameDataModel.LevelResultData = levelResultData;
-
-            if (levelResultData.IsWin)
+            if (isWin)
             {
                 CompleteLevel().Forget();
                 EventLevelCompleted.OnNext(Unit.Default);

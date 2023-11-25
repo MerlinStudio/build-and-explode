@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Configs;
-using Creators;
+using Common.Configs;
+using Common.Creators;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Game.View.Widgets;

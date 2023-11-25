@@ -1,4 +1,5 @@
 using System;
+using Base.Dev.Core.Runtime.Level;
 using Dev.Core.Level;
 
 namespace Dev.Core.Interfaces

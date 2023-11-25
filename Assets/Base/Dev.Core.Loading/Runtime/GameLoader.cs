@@ -1,8 +1,6 @@
 using Cysharp.Threading.Tasks;
-using Game.Data.Models;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Zenject;
 
 namespace Dev.Core.Loading
 {
@@ -11,18 +9,12 @@ namespace Dev.Core.Loading
         [SerializeField]
         private GameLoadingPanel loadingPanel;
 
-        [Inject]
-        private GameDataModel gameDataModel;
-
         private async void Start()
         {
             DontDestroyOnLoad(gameObject);
             
             await ShowSplashScreen();
             loadingPanel.SetProgress(0.33f);
-
-            await LoadApp();
-            loadingPanel.SetProgress(0.66f);
 
             await LoadNexScene();
             loadingPanel.SetProgress(1f);
@@ -39,14 +31,6 @@ namespace Dev.Core.Loading
             loadingPanel.Initialize();
             loadingPanel.ShowPanel(true);
             await UniTask.Yield();
-        }
-
-        private async UniTask LoadApp()
-        {
-            // initialization callbacks
-            var loadCommand = gameDataModel.Load();
-            var dataTask = UniTask.WaitWhile(() => loadCommand.IsCompleted == false);
-            await UniTask.WhenAll(dataTask);
         }
 
         private async UniTask LoadNexScene()

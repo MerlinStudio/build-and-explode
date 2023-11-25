@@ -1,43 +1,50 @@
 using System.Collections.Generic;
 using System.Linq;
+using Base.Dev.Core.Runtime.Configs;
+using Base.Dev.Core.Runtime.Level;
+using Common.Saves.Controllers;
+using Common.Saves.Interfaces;
+using Cysharp.Threading.Tasks;
 using Dev.Core.Interfaces;
 using Dev.Core.Level;
-using Game.Data.Models;
 
 namespace Dev.Core.Main
 {
     public class PlayerLevelsProvider : ILevelsProvider
     {
-        public PlayerLevelsProvider(GameDataModel gameDataModel, LevelsConfig levelsConfig)
+        public PlayerLevelsProvider(LevelsConfig levelsConfig, ISavesProvider savesProvider)
         {
-            this.gameDataModel = gameDataModel;
-            this.levelsConfig = levelsConfig;
+            m_levelsConfig = levelsConfig;
+            m_savesProvider = savesProvider;
         }
         
-        private readonly GameDataModel gameDataModel;
-        private readonly LevelsConfig levelsConfig;
+        private readonly LevelsConfig m_levelsConfig;
+        private readonly ISavesProvider m_savesProvider;
 
         public Level.Level Level { get; set; }
 
+        private int m_selectedLevelNumber;
+        private bool m_isSavesLoaded;
+
         public LevelData GetLevelData()
         {
-            var selectedLevelNumber = gameDataModel.PastLevelNumber;
-            var levelsCount = levelsConfig.LevelPacks[0].LevelsData.Count;
-            if (selectedLevelNumber >= levelsCount)
+            m_selectedLevelNumber = m_savesProvider.GetSavesData<SelectedLevelNumberSaves>();
+            var levelsCount = m_levelsConfig.LevelPacks[0].LevelsData.Count;
+            if (m_selectedLevelNumber >= levelsCount)
             {
                 var repeatLevels = GetRepeatLevels();
-                var repeatIndex = (selectedLevelNumber - levelsCount) % repeatLevels.Count;
+                var repeatIndex = (m_selectedLevelNumber - levelsCount) % repeatLevels.Count;
                 var repeatLevelData = repeatLevels[repeatIndex];
                 return repeatLevelData;
             }
 
-            var levelData = levelsConfig.LevelPacks[0].LevelsData.ElementAt(selectedLevelNumber);
+            var levelData = m_levelsConfig.LevelPacks[0].LevelsData.ElementAt(m_selectedLevelNumber);
             return levelData;
         }
 
         private List<LevelData> GetRepeatLevels()
         {
-            return levelsConfig.LevelPacks[0].LevelsData.Where(t => t.IsRepeat).ToList();
+            return m_levelsConfig.LevelPacks[0].LevelsData.Where(t => t.IsRepeat).ToList();
         }
     }
 }

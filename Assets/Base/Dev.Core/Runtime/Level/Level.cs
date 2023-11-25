@@ -1,4 +1,4 @@
-using Game.Data;
+using Base.Dev.Core.Runtime.Level;
 using UniRx;
 using UnityEngine;
 
@@ -7,11 +7,11 @@ namespace Dev.Core.Level
     public abstract class Level : MonoBehaviour
     {
         public bool IsShow { get; private set; }
-        public ISubject<LevelResultData> EventLevelResult { get; private set; }
+        public ISubject<bool> EventLevelResult { get; private set; }
 
         public virtual void Initialize(LevelSettings levelSettings)
         {
-            EventLevelResult = new Subject<LevelResultData>();
+            EventLevelResult = new Subject<bool>();
         }
 
         public virtual void DeInitialize()
@@ -33,9 +33,9 @@ namespace Dev.Core.Level
             IsShow = false;
         }
 
-        public virtual void Finish(LevelResultData levelResultData)
+        public virtual void Finish(bool isWin)
         {
-            EventLevelResult?.OnNext(levelResultData);
+            EventLevelResult?.OnNext(isWin);
         }
     }
 }

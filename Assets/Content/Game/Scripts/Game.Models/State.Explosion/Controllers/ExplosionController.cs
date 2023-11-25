@@ -1,13 +1,16 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Data.Builds.Blocks;
 using Data.Explosion.Enums;
 using Data.Explosion.Info;
 using State.Explosion.Jobs;
+using UniRx;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Jobs;
+using Random = UnityEngine.Random;
 
 namespace State.Explosion.Controllers
 {
@@ -16,12 +19,19 @@ namespace State.Explosion.Controllers
         public ExplosionController(
             BlockPropertyInfo[]blockPropertyInfo,
             BlockViewInfo[] blockViewInfo,
-            EnvironmentInfo environmentInfo)
+            EnvironmentInfo environmentInfo,
+            ISubject<Unit> explosionFinished)
         {
             m_blockPropertyInfo = blockPropertyInfo;
             m_blockViewInfo = blockViewInfo;
             m_environmentInfo = environmentInfo;
+            m_explosionFinished = explosionFinished;
         }
+
+        private readonly BlockPropertyInfo[] m_blockPropertyInfo;
+        private readonly BlockViewInfo[] m_blockViewInfo;
+        private readonly EnvironmentInfo m_environmentInfo;
+        private readonly ISubject<Unit> m_explosionFinished;
         
         private TransformAccessArray m_transformAccessArray;
         private NativeArray<Vector3> m_position;
@@ -34,19 +44,15 @@ namespace State.Explosion.Controllers
         private NativeArray<BlockPropertyInfo> m_nativeBlockPropertyInfo;
         private NativeArray<float> m_randomCoefficient;
 
+        private Dictionary<int, List<int>> m_cubeLayers;
         private ExplosionJob m_explosionJob;
         private MovementJob m_movementJob;
         private PhysicsJob m_physicsJob;
-
-        private readonly BlockPropertyInfo[] m_blockPropertyInfo;
-        private readonly BlockViewInfo[] m_blockViewInfo;
-        private readonly EnvironmentInfo m_environmentInfo;
         private ExplosionInfo m_explosionInfo;
         private bool m_isEndExplosion;
         private bool m_isUpdateExplosion;
         private int m_blockCount;
         private int m_explosionsLeft;
-        private Dictionary<int, List<int>> m_cubeLayers;
 
         public void Init()
         {
@@ -67,6 +73,20 @@ namespace State.Explosion.Controllers
             {
                 m_randomCoefficient[i] = Random.Range(-3f, 3f);
             }
+        }
+        
+        private void DeInit()
+        {
+            m_position.Dispose();
+            m_velocity.Dispose();
+            m_rotation.Dispose();
+            m_lastPosition.Dispose();
+            m_acceleration.Dispose();
+            m_nativeBlockPropertyInfo.Dispose();
+            m_blockState.Dispose();
+            m_drag.Dispose();
+            m_randomCoefficient.Dispose();
+            m_transformAccessArray.Dispose();
         }
 
         public void SetupTransforms()
@@ -130,20 +150,10 @@ namespace State.Explosion.Controllers
             if (!m_isEndExplosion && m_explosionsLeft <= 0)
             {
                 m_isUpdateExplosion = false;
-                OnDestroy();
-                
+                DeInit();
+                m_explosionFinished.OnNext(Unit.Default);
                 Debug.Log("+++++End explosion+++++");
             }
-        }
-
-        public void Reset()
-        {
-            if (!m_isEndExplosion)
-            {
-                return;
-            }
-            m_isEndExplosion = false;
-            OnDestroy();
         }
 
         public void Explosion(ExplosionInfo explosionInfo, int explosionsLeft)
@@ -246,20 +256,6 @@ namespace State.Explosion.Controllers
                     }
                 }
             }
-        }
-
-        private void OnDestroy()
-        {
-            m_position.Dispose();
-            m_velocity.Dispose();
-            m_rotation.Dispose();
-            m_lastPosition.Dispose();
-            m_acceleration.Dispose();
-            m_nativeBlockPropertyInfo.Dispose();
-            m_blockState.Dispose();
-            m_drag.Dispose();
-            m_randomCoefficient.Dispose();
-            m_transformAccessArray.Dispose();
         }
     }
 }

@@ -1,7 +1,8 @@
 using System.Linq;
+using Common.Creators;
+using Common.Saves.Providers;
 using Dev.Core.Configs;
-using Dev.Core.Main;
-using Game.Data.Installers;
+using Game.Core.GameStateMachine;
 using UnityEngine;
 using Zenject;
 
@@ -35,10 +36,9 @@ namespace Dev.Core.Installer
 
         public override void InstallBindings()
         {
-            // Install features
-            DataInstaller.Install(Container);
-            Container.BindInterfacesTo<AssetProvider>().AsSingle();
-            Container.BindInterfacesTo<PlayerLevelsProvider>().AsSingle();
+            Container.BindInterfacesTo<SavesProvider>().AsSingle();
+            Container.BindInterfacesTo<ManagerCreator>().AsSingle();
+            Container.BindInterfacesTo<GameStateSwitcher>().AsSingle();
         }
     }
 }
