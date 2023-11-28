@@ -12,7 +12,8 @@ namespace Common.Creators
     public class ParticleCreator : MonoBehaviour, ICreator
     {
         [SerializeField] private Transform m_parent;
-        [Inject] private EnvironmentInfoConfig EnvironmentInfoConfig { get; }
+        
+        [Inject] private EnvironmentInfoConfig m_environmentInfoConfig;
 
         private Dictionary<string, List<ParticleSystem>> m_particlePool;
         
@@ -21,9 +22,9 @@ namespace Common.Creators
             m_particlePool ??= new Dictionary<string, List<ParticleSystem>>();
             if (m_particlePool.Count <= 0)
             {
-                for (int i = 0, l = EnvironmentInfoConfig.ParticlesInfo.Count; i < l; i++)
+                for (int i = 0, l = m_environmentInfoConfig.ParticlesInfo.Count; i < l; i++)
                 {
-                    var particleSystemInfo = EnvironmentInfoConfig.ParticlesInfo[i];
+                    var particleSystemInfo = m_environmentInfoConfig.ParticlesInfo[i];
                     m_particlePool[particleSystemInfo.Id] = new List<ParticleSystem>();
                 }
             }
@@ -50,7 +51,7 @@ namespace Common.Creators
                     }
                 }
             }
-            var particleInfo = EnvironmentInfoConfig.ParticlesInfo.FirstOrDefault(p => p.Id == id);
+            var particleInfo = m_environmentInfoConfig.ParticlesInfo.FirstOrDefault(p => p.Id == id);
             var particleReference = await AssetReferenceExtension.LoadAssetReferenceAsync(particleInfo.ParticleReference);
             var newParticle = Instantiate(particleReference, m_parent).GetComponent<ParticleSystem>();
             m_particlePool[id].Add(newParticle);

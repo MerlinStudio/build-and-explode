@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Common.Configs;
 using Common.Creators;
@@ -7,11 +6,14 @@ using Common.Saves.Interfaces;
 using Cysharp.Threading.Tasks;
 using Data.Builds.Blocks;
 using Data.Builds.Configs;
+using Game.Models.Common.Subject;
+using State.Creator.Controllers;
 using State.Creator.Interfaces;
 using State.LevelLoader.Interfaces;
+using UniRx;
 using UnityEngine;
 
-namespace State.Creator.Controllers
+namespace Game.Models.State.Creator.Controllers
 {
     public class СonstructionСontroller : IBuildCreator, IBlocksInfoProvider, IConstructionReset
     {
@@ -19,18 +21,23 @@ namespace State.Creator.Controllers
             ILevelProvider levelProvider,
             IManagerCreator managerCreator,
             ISavesProvider savesProvider,
-            BuildAnimationInfo buildAnimationInfo)
+            EnvironmentInfoConfig environmentInfoConfig,
+            ISubjectBinder<Unit> onEndConstruction,
+            ISubjectBinder<BlockViewInfo> onBlockCreated)
         {
             m_levelProvider = levelProvider;
             m_managerCreator = managerCreator;
             m_savesProvider = savesProvider;
-            m_buildAnimationInfo = buildAnimationInfo;
+            m_environmentInfoConfig = environmentInfoConfig;
+            m_onEndConstruction = onEndConstruction;
+            m_onBlockCreated = onBlockCreated;
         }
 
-        public event Action EventEndConstruction;
         public bool IsAllAnimationFinished => m_blockAnimationController.IsAllAnimationFinished;
 
-        private readonly BuildAnimationInfo m_buildAnimationInfo;
+        private readonly EnvironmentInfoConfig m_environmentInfoConfig;
+        private readonly ISubjectBinder<Unit> m_onEndConstruction;
+        private readonly ISubjectBinder<BlockViewInfo> m_onBlockCreated;
         private readonly ILevelProvider m_levelProvider;
         private readonly IManagerCreator m_managerCreator;
         private readonly ISavesProvider m_savesProvider;
@@ -47,7 +54,7 @@ namespace State.Creator.Controllers
         public void Init()
         {
             m_blockGameObjectPool ??= new Dictionary<string, List<NewBlockInfo>>();
-            m_blockAnimationController = new BlockAnimationController(m_buildAnimationInfo, m_managerCreator);
+            m_blockAnimationController = new BlockAnimationController(m_environmentInfoConfig.BuildAnimationInfo, m_managerCreator);
             m_blockAnimationController.Init();
         }
 
@@ -78,9 +85,11 @@ namespace State.Creator.Controllers
                 var blockTransform = await CreateBlock();
                 blockTransformList.Add(blockTransform);
                 m_savesProvider.SetSavesData<LastNumberBlockSaves>(m_index);
+                m_onBlockCreated.Subject.OnNext(m_blockViewInfo[m_index - 1]);
+                
                 if (m_buildDataConfig.BlockData.Count <= m_index)
                 {
-                    EventEndConstruction?.Invoke();
+                    m_onEndConstruction.Subject.OnNext(Unit.Default);
                     break;
                 }
             }
@@ -147,6 +156,7 @@ namespace State.Creator.Controllers
                     block.gameObject.SetActive(false);
                     block.transform.localPosition = Vector3.zero;
                     block.transform.localEulerAngles = Vector3.zero;
+                    block.transform.localScale = Vector3.one;
                 }
             }
         }

@@ -5,6 +5,7 @@ using Common.Creators;
 using Content.Game.Scripts.Game.Utils.Extensions;
 using Cysharp.Threading.Tasks;
 using Data.Builds.Blocks;
+using Game.Models.Common.Subject;
 using State.Creator.Interfaces;
 using State.Explosion.Interfaces;
 using UniRx;
@@ -17,12 +18,14 @@ namespace State.Explosion.Controllers
         public BuildLayerController(
             IManagerCreator managerCreator,
             IBlocksInfoProvider blocksInfoProvider,
-            IBombInfoProvider bombInfoProvider)
+            IBombInfoProvider bombInfoProvider,
+            ISubjectBinder<int> onBuildLayerHeight)
         {
             m_managerCreator = managerCreator;
             m_blockPropertyInfo = blocksInfoProvider.GetBlockPropertyInfo().ToList();
             m_blockViewInfo = blocksInfoProvider.GetBlockViewInfo().ToList();
             m_bombInfoProvider = bombInfoProvider;
+            m_onBuildLayerHeight = onBuildLayerHeight;
         }
 
         public event Action<Transform> EventSelectBombPlace;
@@ -30,6 +33,7 @@ namespace State.Explosion.Controllers
         private readonly string m_selectionBombId = "selection_bomb";
         private readonly IManagerCreator m_managerCreator;
         private readonly IBombInfoProvider m_bombInfoProvider;
+        private readonly ISubjectBinder<int> m_onBuildLayerHeight;
 
         private int m_currentBuildLayer;
         private PointerHandler m_selectionBombReference;
@@ -178,6 +182,7 @@ namespace State.Explosion.Controllers
                 return;
             }
 
+            m_onBuildLayerHeight.Subject.OnNext(newBuildLayer);
             ResetAllBlocks();
             
             for (int i = 0; i < m_buildingLayerDictionary.Count; i++)

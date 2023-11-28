@@ -1,4 +1,4 @@
-namespace Game.Core.GameStateMachine
+namespace Game.Core.GameStateMachine.Interfaces
 {
     public interface IGameStateSwitcher
     {

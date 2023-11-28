@@ -1,45 +1,43 @@
 using Cysharp.Threading.Tasks;
-using Data.Builds.Configs;
 using Dev.Core.Ui.UI.Manager;
+using Game.Core.GameStateMachine.Interfaces;
 using Game.View.Panels;
-using State.Creator.Interfaces;
 using State.SavaLoader.Interfaces;
-using UnityEngine;
 
-namespace Game.Core.GameStateMachine
+namespace Game.Core.GameStateMachine.States
 {
     public class StateSaveLoader : AbstractStateBase
     {
-        public StateSaveLoader(StateSaveLoaderDependencies dependencies) : base(dependencies)
+        public StateSaveLoader(
+            UiManager uiManager,
+            IGameStateSwitcher gameStateSwitcher,
+            ISaveConstructionController saveConstructionController)
         {
-            m_dependencies = dependencies;
+            m_uiManager = uiManager;
+            m_gameStateSwitcher = gameStateSwitcher;
+            m_saveConstructionController = saveConstructionController;
         }
         
-        private readonly StateSaveLoaderDependencies m_dependencies;
-
+        private readonly UiManager m_uiManager;
+        private readonly IGameStateSwitcher m_gameStateSwitcher;
+        private readonly ISaveConstructionController m_saveConstructionController;
+        
         public override async void InitState()
         {
-            var task1 = m_dependencies.UiManager.ShowPanelAsync<SaveLoaderPanel>();
-            var task2 =  m_dependencies.SaveConstructionController.Construction();
+            var task1 = m_uiManager.ShowPanelAsync<SaveLoaderPanel>();
+            var task2 =  m_saveConstructionController.Construction();
             await UniTask.WhenAll(task1, task2);
-            if (m_dependencies.SaveConstructionController.CheckConstructionProgress())
+            if (m_saveConstructionController.CheckConstructionProgress())
             {
-                m_dependencies.GameStateSwitcher.SwitchState<StateExplosion>();
+                m_gameStateSwitcher.SwitchState<StateExplosion>();
                 return;
             }
-            m_dependencies.GameStateSwitcher.SwitchState<StateBuild>();
+            m_gameStateSwitcher.SwitchState<StateBuild>();
         }
 
         public override void DeinitState()
         {
-            m_dependencies.UiManager.HidePanel<SaveLoaderPanel>();
-        }
-        
-        public class StateSaveLoaderDependencies : StateDependencies
-        {
-            public UiManager UiManager;
-            public IGameStateSwitcher GameStateSwitcher;
-            public ISaveConstructionController SaveConstructionController;
+            m_uiManager.HidePanel<SaveLoaderPanel>();
         }
     }
 }

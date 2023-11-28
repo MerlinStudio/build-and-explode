@@ -2,31 +2,57 @@ using Common.Configs;
 using Common.Saves.Controllers;
 using Common.Saves.Interfaces;
 using Cysharp.Threading.Tasks;
-using Data.Builds.Configs;
 using Dev.Core.Ui.UI.Manager;
+using Game.Core.GameStateMachine.Interfaces;
+using Game.Models.Common.Subject;
 using Game.View.Panels;
 using State.Creator.Controllers;
 using State.Creator.Interfaces;
 using State.LevelLoader.Interfaces;
+using UniRx;
 
-namespace Game.Core.GameStateMachine
+namespace Game.Core.GameStateMachine.States
 {
     public class StateBuild : AbstractStateBase
     {
-        public StateBuild(StateBuildDependencies dependencies) : base(dependencies)
+        public StateBuild(
+            UiManager uiManager,
+            IGameStateSwitcher gameStateSwitcher,
+            IBuildCreator buildCreator,
+            IManagerCreator managerCreator,
+            ISavesProvider savesProvider,
+            ILevelProvider levelProvider,
+            EnvironmentInfoConfig environmentInfoConfig,
+            ISubjectBinder<Unit> onEndConstruction)
         {
-            m_dependencies = dependencies;
+            m_uiManager = uiManager;
+            m_gameStateSwitcher = gameStateSwitcher;
+            m_buildCreator = buildCreator;
+            m_managerCreator = managerCreator;
+            m_savesProvider = savesProvider;
+            m_levelProvider = levelProvider;
+            m_environmentInfoConfig = environmentInfoConfig;
+            m_onEndConstruction = onEndConstruction;
         }
-
-        private readonly StateBuildDependencies m_dependencies;
         
+        private readonly UiManager m_uiManager;
+        private readonly IGameStateSwitcher m_gameStateSwitcher;
+        private readonly IBuildCreator m_buildCreator;
+        private readonly IManagerCreator m_managerCreator;
+        private readonly ISavesProvider m_savesProvider;
+        private readonly ILevelProvider m_levelProvider;
+        private readonly EnvironmentInfoConfig m_environmentInfoConfig;
+        private readonly ISubjectBinder<Unit> m_onEndConstruction;
+
+        private CompositeDisposable m_compositeDisposable;
         private BuildClickerPanel m_buildClickerPanel;
         private ClickEffectController m_clickEffectController;
         private int m_savesBlockMultiplier;
 
         public override async void InitState()
         {
-            m_savesBlockMultiplier = m_dependencies.SavesProvider.GetSavesData<BlockMultiplierSaves>();
+            m_savesBlockMultiplier = m_savesProvider.GetSavesData<BlockMultiplierSaves>();
+            m_compositeDisposable = new CompositeDisposable();
             await SetBuildClickerPanel();
             SetBuildCreator();
             SetClickEffectController();
@@ -34,67 +60,50 @@ namespace Game.Core.GameStateMachine
 
         public override void DeinitState()
         {
-            m_dependencies.UiManager.HidePanel<BuildClickerPanel>();
-            m_buildClickerPanel.EventButtonClicked -= OnCreateBlock;
-            m_dependencies.BuildCreator.DeInit();
-            m_dependencies.BuildCreator.EventEndConstruction -= OnEndConstruction;
+            m_uiManager.HidePanel<BuildClickerPanel>();
+            m_buildCreator.DeInit();
             m_clickEffectController.DeInit();
+            m_compositeDisposable.Dispose();
         }
 
         private async UniTask SetBuildClickerPanel()
         {
-            m_buildClickerPanel = await m_dependencies.UiManager.ShowPanelAsync<BuildClickerPanel>();
-            m_buildClickerPanel.EventButtonClicked += OnCreateBlock;
+            m_buildClickerPanel = await m_uiManager.ShowPanelAsync<BuildClickerPanel>();
+            m_buildClickerPanel.OnButtonClicked.Subscribe(OnCreateBlock).AddTo(m_compositeDisposable);
         }
         
         private void SetBuildCreator()
         {
-            m_dependencies.BuildCreator.Init();
-            m_dependencies.BuildCreator.SetAmountBlocks(m_savesBlockMultiplier);
-            m_dependencies.BuildCreator.EventEndConstruction += OnEndConstruction;
+            m_buildCreator.Init();
+            m_buildCreator.SetAmountBlocks(m_savesBlockMultiplier);
+            m_onEndConstruction.Subject.Subscribe(OnEndConstruction).AddTo(m_compositeDisposable);
         }
 
         private void SetClickEffectController()
         {
-            m_clickEffectController = new ClickEffectController(
-                m_dependencies.ManagerCreator,
-                m_dependencies.EnvironmentInfoConfig.ClickEffectAnimationInfo);
+            m_clickEffectController = new ClickEffectController(m_managerCreator, m_environmentInfoConfig.ClickEffectAnimationInfo);
             m_clickEffectController.Init();
             m_clickEffectController.UpdateAmountBlock(m_savesBlockMultiplier);
         }
 
-        private void OnCreateBlock()
+        private void OnCreateBlock(Unit unit)
         {
-            m_dependencies.BuildCreator.CreateBlocks();
+            m_buildCreator.CreateBlocks();
             m_clickEffectController.PlayAddBlockEffect(m_buildClickerPanel.GetAddBlockEffectPosition());
         }
 
-        private async void OnEndConstruction()
+        private async void OnEndConstruction(Unit unit)
         {
-            m_dependencies.BuildCreator.EventEndConstruction -= OnEndConstruction;
-            m_buildClickerPanel.EventButtonClicked -= OnCreateBlock;
+            m_compositeDisposable.Dispose();
 
-            var fireworkController = new FireworkController(
-                m_dependencies.ManagerCreator,
-                m_dependencies.LevelProvider);
+            var fireworkController = new FireworkController(m_managerCreator, m_levelProvider);
             var task1 = fireworkController.PlayFirework();
             var task2 = UniTask.WaitWhile(() => m_clickEffectController.IsAllAnimationFinished == false);
-            var task3 = UniTask.WaitWhile(() => m_dependencies.BuildCreator.IsAllAnimationFinished == false);
+            var task3 = UniTask.WaitWhile(() => m_buildCreator.IsAllAnimationFinished == false);
             await UniTask.WhenAll(task1, task2, task3);
             
-            m_dependencies.UiManager.HidePanel<BuildClickerPanel>();
-            m_dependencies.GameStateSwitcher.SwitchState<StateExplosion>();
-        }
-        
-        public class StateBuildDependencies : StateDependencies
-        {
-            public UiManager UiManager;
-            public IGameStateSwitcher GameStateSwitcher;
-            public IBuildCreator BuildCreator;
-            public IManagerCreator ManagerCreator;
-            public ISavesProvider SavesProvider;
-            public ILevelProvider LevelProvider;
-            public EnvironmentInfoConfig EnvironmentInfoConfig;
+            m_uiManager.HidePanel<BuildClickerPanel>();
+            m_gameStateSwitcher.SwitchState<StateExplosion>();
         }
     }
 }

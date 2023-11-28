@@ -1,52 +1,53 @@
 using Base.Dev.Core.Runtime.Configs;
 using Common.Saves.Interfaces;
+using Game.Core.GameStateMachine.Interfaces;
 using State.Creator.Interfaces;
 using State.LevelLoader.Controllers;
 using State.LevelLoader.Interfaces;
 
-namespace Game.Core.GameStateMachine
+namespace Game.Core.GameStateMachine.States
 {
     public class StateLevelLoader : AbstractStateBase
     {
-        public StateLevelLoader(StateLevelLoaderDependencies dependencies) : base(dependencies)
+        public StateLevelLoader(
+            IGameStateSwitcher gameStateSwitcher, 
+            ISavesProvider savesProvider,
+            ILevelProvider levelProvider,
+            IConstructionReset constructionReset,
+            LevelsConfig levelsConfig)
         {
-            m_dependencies = dependencies;
+            m_gameStateSwitcher = gameStateSwitcher;
+            m_savesProvider = savesProvider;
+            m_levelProvider = levelProvider;
+            m_constructionReset = constructionReset;
+            m_levelsConfig = levelsConfig;
         }
         
-        private readonly StateLevelLoaderDependencies m_dependencies;
-
+        private readonly IGameStateSwitcher m_gameStateSwitcher;
+        private readonly ISavesProvider m_savesProvider;
+        private readonly ILevelProvider m_levelProvider;
+        private readonly IConstructionReset m_constructionReset;
+        private readonly LevelsConfig m_levelsConfig;
+        
         private LevelLoaderController m_levelLoaderController;
 
         public override void InitState()
         {
-            m_levelLoaderController ??= new LevelLoaderController(
-                m_dependencies.LevelsConfig,
-                m_dependencies.SavesProvider,
-                m_dependencies.LevelProvider);
-
+            m_levelLoaderController ??= new LevelLoaderController(m_levelsConfig, m_savesProvider, m_levelProvider);
             if (m_levelLoaderController.CheckCurrentBuildDataConfig())
             {
                 m_levelLoaderController.SetCurrentBuildDataConfig();
-                m_dependencies.ConstructionReset.ResetBuildData();
-                m_dependencies.GameStateSwitcher.SwitchState<StateBuild>();
+                m_constructionReset.ResetBuildData();
+                m_gameStateSwitcher.SwitchState<StateBuild>();
                 return;
             }
             m_levelLoaderController.SetCurrentBuildDataConfig();
-            m_dependencies.ConstructionReset.ResetBuildData();
-            m_dependencies.GameStateSwitcher.SwitchState<StateSaveLoader>();
+            m_constructionReset.ResetBuildData();
+            m_gameStateSwitcher.SwitchState<StateSaveLoader>();
         }
 
         public override void DeinitState()
         {
-        }
-        
-        public class StateLevelLoaderDependencies : StateDependencies
-        {
-            public IGameStateSwitcher GameStateSwitcher;
-            public ISavesProvider SavesProvider;
-            public ILevelProvider LevelProvider;
-            public IConstructionReset ConstructionReset;
-            public LevelsConfig LevelsConfig;
         }
     }
 }

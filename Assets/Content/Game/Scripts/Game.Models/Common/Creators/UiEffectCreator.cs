@@ -12,8 +12,8 @@ namespace Common.Creators
 {
     public class UiEffectCreator : MonoBehaviour, ICreator
     {
-        [Inject] private UiManager UiManager { get; }
-        [Inject] private EnvironmentInfoConfig EnvironmentInfoConfig { get; }
+        [Inject] private UiManager m_uiManager;
+        [Inject] private EnvironmentInfoConfig m_environmentInfoConfig;
 
         private Transform m_effectParent;
         private AddBlockEffectWidget m_addBlockEffectWidgetReference;
@@ -30,13 +30,13 @@ namespace Common.Creators
         {
             if (m_addBlockEffectWidgetReference == null)
             {
-                var result  = await AssetReferenceExtension.LoadAssetReferenceAsync(EnvironmentInfoConfig.AddBlockEffectWidgetReference);
+                var result  = await AssetReferenceExtension.LoadAssetReferenceAsync(m_environmentInfoConfig.AddBlockEffectWidgetReference);
                 m_addBlockEffectWidgetReference = result.GetComponent<AddBlockEffectWidget>();
             }
 
             if (m_effectParent == null)
             {
-                var buildClickerPanel = UiManager.TryGetPanel<BuildClickerPanel>();
+                var buildClickerPanel = m_uiManager.TryGetPanel<BuildClickerPanel>();
                 m_effectParent = buildClickerPanel.EffectParent;
             }
 

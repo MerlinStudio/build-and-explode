@@ -1,20 +1,11 @@
-using State.Explosion.Interfaces;
+using Zenject;
 
-namespace Game.Core.GameStateMachine
+namespace Game.Core.GameStateMachine.Interfaces
 {
-    public abstract class AbstractStateBase : IGameTick
+    public abstract class AbstractStateBase : ITickable
     {
-        protected AbstractStateBase(StateDependencies dependencies)
-        {
-        }
-
         public abstract void InitState();
         public abstract void DeinitState();
-        
-        public abstract class StateDependencies
-        {
-        }
-
         public virtual void Tick()
         {
         }

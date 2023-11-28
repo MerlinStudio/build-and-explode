@@ -12,8 +12,8 @@ namespace Common.Creators
     public class BlockCreator : MonoBehaviour, ICreator
     {
         [SerializeField] private Transform m_parent;
-        
-        [Inject] private BlockInfoConfigs BlockInfoConfigs { get; }
+
+        [Inject] private BlockInfoConfigs m_blockInfoConfigs;
 
         private Dictionary<string, NewBlockInfo> m_newBlockInfoDictionary;
         
@@ -39,7 +39,7 @@ namespace Common.Creators
             }
             else
             {
-                var blockInfo = BlockInfoConfigs.BlockInfoList.Find(i => i.Id == id);
+                var blockInfo = m_blockInfoConfigs.BlockInfoList.Find(i => i.Id == id);
                 var blockReference = await AssetReferenceExtension.LoadAssetReferenceAsync(blockInfo.BlockReference);
                 newBlockInfo = new NewBlockInfo
                 {

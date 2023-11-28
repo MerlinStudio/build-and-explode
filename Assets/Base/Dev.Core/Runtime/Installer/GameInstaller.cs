@@ -36,9 +36,6 @@ namespace Dev.Core.Installer
 
         public override void InstallBindings()
         {
-            Container.BindInterfacesTo<SavesProvider>().AsSingle();
-            Container.BindInterfacesTo<ManagerCreator>().AsSingle();
-            Container.BindInterfacesTo<GameStateSwitcher>().AsSingle();
         }
     }
 }

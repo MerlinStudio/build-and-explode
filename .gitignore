@@ -11,3 +11,4 @@ ProjectSettings
 Assets/AddressableAssetsData/WebGL
 *.xml
 Assets/AddressableAssetsData/ProfileDataSourceSettings.asset
+Assets/YandexGame/WorkingData/Editor/SavesEditorYG.json

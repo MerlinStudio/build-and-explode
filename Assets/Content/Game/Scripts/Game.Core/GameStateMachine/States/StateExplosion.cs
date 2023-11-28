@@ -1,7 +1,9 @@
 using Common.Configs;
 using Cysharp.Threading.Tasks;
-using Data.Builds.Configs;
 using Dev.Core.Ui.UI.Manager;
+using Game.Core.GameStateMachine.Interfaces;
+using Game.Models.Camera.Interfaces;
+using Game.Models.Common.Subject;
 using Game.View.Panels;
 using State.Creator.Interfaces;
 using State.Explosion.Controllers;
@@ -9,16 +11,42 @@ using State.Explosion.Interfaces;
 using State.LevelLoader.Interfaces;
 using UniRx;
 
-namespace Game.Core.GameStateMachine
+namespace Game.Core.GameStateMachine.States
 {
     public class StateExplosion : AbstractStateBase
     {
-        public StateExplosion(StateExplosionDependencies dependencies) : base(dependencies)
+        public StateExplosion(
+            UiManager uiManager,
+            EnvironmentInfoConfig environmentInfoConfig,
+            ShopConfig shopConfig,
+            ILevelProvider levelProvider,
+            IGameStateSwitcher gameStateSwitcher,
+            IManagerCreator managerCreator,
+            IBlocksInfoProvider blocksInfoProvider,
+            ICameraProvider cameraProvider,
+            ISubjectBinder<int> onBuildLayerHeight)
         {
-            m_dependencies = dependencies;
+            m_uiManager = uiManager;
+            m_environmentInfoConfig = environmentInfoConfig;
+            m_shopConfig = shopConfig;
+            m_levelProvider = levelProvider;
+            m_gameStateSwitcher = gameStateSwitcher;
+            m_managerCreator = managerCreator;
+            m_blocksInfoProvider = blocksInfoProvider;
+            m_cameraProvider = cameraProvider;
+            m_onBuildLayerHeight = onBuildLayerHeight;
         }
+        
+        private readonly UiManager m_uiManager;
+        private readonly EnvironmentInfoConfig m_environmentInfoConfig;
+        private readonly ShopConfig m_shopConfig;
+        private readonly ILevelProvider m_levelProvider;
+        private readonly IGameStateSwitcher m_gameStateSwitcher;
+        private readonly IManagerCreator m_managerCreator;
+        private readonly IBlocksInfoProvider m_blocksInfoProvider;
+        private readonly ICameraProvider m_cameraProvider;
+        private readonly ISubjectBinder<int> m_onBuildLayerHeight;
 
-        private readonly StateExplosionDependencies m_dependencies;
         private PreparationExplosionPanel m_preparationExplosionPanel;
         private BuildLayerController m_buildLayerController;
         private PreparationExplosion m_preparationExplosion;
@@ -29,6 +57,7 @@ namespace Game.Core.GameStateMachine
 
         public override async void InitState()
         {
+            m_cameraProvider.SetActiveRotateCamera(false);
             await SetPreparationExplosionPanel();
             SetBombInfoProvider();
             SetPreparationExplosion();
@@ -40,7 +69,7 @@ namespace Game.Core.GameStateMachine
             m_preparationExplosionPanel.EventExplosionButtonClick -= OnExplosionButtonClick;
             m_preparationExplosionPanel.EventAddBombButtonClick -= OnAddBombButtonClick;
             m_preparationExplosionPanel.EventBuildingLayerChange -= OnChangeBuildingLayer;
-            m_dependencies.UiManager.HidePanel<PreparationExplosionPanel>();
+            m_uiManager.HidePanel<PreparationExplosionPanel>();
             m_buildLayerController.DeInit();
             m_buildLayerController.EventSelectBombPlace -= m_preparationExplosion.OnSelectBombPlace;
             m_compositeDisposable.Dispose();
@@ -49,7 +78,7 @@ namespace Game.Core.GameStateMachine
 
         private async UniTask SetPreparationExplosionPanel()
         {
-            m_preparationExplosionPanel = await m_dependencies.UiManager.ShowPanelAsync<PreparationExplosionPanel>();
+            m_preparationExplosionPanel = await m_uiManager.ShowPanelAsync<PreparationExplosionPanel>();
             m_preparationExplosionPanel.EventExplosionButtonClick += OnExplosionButtonClick;
             m_preparationExplosionPanel.EventAddBombButtonClick += OnAddBombButtonClick;
             m_preparationExplosionPanel.EventBuildingLayerChange += OnChangeBuildingLayer;
@@ -67,26 +96,17 @@ namespace Game.Core.GameStateMachine
         {
             m_explosionFinished = new Subject<Unit>();
             m_explosionFinished.Subscribe(OnExplosionFinished).AddTo(m_compositeDisposable);
-            m_buildLayerController = new BuildLayerController(
-                m_dependencies.ManagerCreator, 
-                m_dependencies.BlocksInfoProvider, 
-                m_bombInfoProvider);
-            m_preparationExplosion = new PreparationExplosion(
-                m_dependencies.ManagerCreator, 
-                m_buildLayerController,
-                m_dependencies.EnvironmentInfoConfig, 
-                m_bombInfoProvider,
-                m_explosionFinished);
+            m_buildLayerController = new BuildLayerController(m_managerCreator, m_blocksInfoProvider,
+                m_bombInfoProvider, m_onBuildLayerHeight);
+            m_preparationExplosion = new PreparationExplosion(m_managerCreator, m_buildLayerController, 
+                m_environmentInfoConfig, m_bombInfoProvider, m_explosionFinished);
             m_buildLayerController.Init();
             m_buildLayerController.EventSelectBombPlace += m_preparationExplosion.OnSelectBombPlace;
         }
         
         private void SetInspectorBomb()
         {
-            m_inspectorBomb = new InspectorBomb(
-                m_dependencies.LevelProvider, 
-                m_dependencies.ShopConfig,
-                m_preparationExplosionPanel);
+            m_inspectorBomb = new InspectorBomb(m_levelProvider, m_shopConfig, m_preparationExplosionPanel);
             m_inspectorBomb.Init();
         }
         
@@ -95,13 +115,13 @@ namespace Game.Core.GameStateMachine
             m_preparationExplosionPanel.EventExplosionButtonClick -= OnExplosionButtonClick;
             m_buildLayerController.Explosion();
             await m_preparationExplosionPanel.PlayCountdownExplosion();
-            m_dependencies.UiManager.HidePanel<PreparationExplosionPanel>();
+            m_uiManager.HidePanel<PreparationExplosionPanel>();
             m_preparationExplosion.Explosion();
         }
 
         private void OnExplosionFinished(Unit unit)
         {
-            m_dependencies.GameStateSwitcher.SwitchState<StateResult>();
+            m_gameStateSwitcher.SwitchState<StateResult>();
         }
         
         private void OnAddBombButtonClick(int radius, int force, float delay)
@@ -123,17 +143,6 @@ namespace Game.Core.GameStateMachine
         public override void Tick()
         {
             m_preparationExplosion?.Tick();
-        }
-        
-        public class StateExplosionDependencies : StateDependencies
-        {
-            public UiManager UiManager;
-            public EnvironmentInfoConfig EnvironmentInfoConfig;
-            public ILevelProvider LevelProvider;
-            public ShopConfig ShopConfig;
-            public IGameStateSwitcher GameStateSwitcher;
-            public IManagerCreator ManagerCreator;
-            public IBlocksInfoProvider BlocksInfoProvider;
         }
     }
 }
